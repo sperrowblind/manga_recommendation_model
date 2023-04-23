@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Manga Recommendation Model</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+        <style>
+            body {
+                font-family: Helvetica, Arial, sans-serif;
+                background-color: #261C2C;
+                color: #fafafa;
+            }
+            nav {
+                background-color: #5C527F;
+            }
+            nav .brand-logo {
+                color: #fafafa;
+            }
+            .card {
+                background-color: #3E2C41;
+                color: #fafafa;
+                width: 300px;
+                height: 400px;
+            }
+            .card-image {
+                width: 100%;
+                height: 100%;
+                background-color: #5C527F;
+            }
+            .card-image img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                background-color: #5C527F;
+            }
+            .card-action a.btn {
+                background-color: #5C527F;
+            }
+            .modal {
+                background-color: #5C527F;
+            }
+            .modal-footer .btn-flat {
+                color: #fafafa;
+            }
+            .hide {
+                display: none;
+            }
+            .material-icons.right {
+                display: inline !important;
+            }
+        </style>
+    </head>
+    <body>
+        <nav>
+            <div class="row">
+                <div class="nav-wrapper">
+                    <a href="#" class="brand-logo center">Manga Recommendation Model Application</a>
+                    <div class="card-action right-align">
+                        <a href="{{ url_for('home') }}" class="waves-effect waves-light btn" style="padding-right: 10px; margin-right: 10%;">Back to Home</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <h6>
+            In this section, I wanted to discuss different statistics of the Manga Recommendation Model and drawbacks that I've run into while working on it.
+            Included are a few graphs and tables representing the different statistics and interesting observations that I've seen.
+        </h6>
+        <h6>
+            This section was last updated on April 22, 2023.
+        </h6>
+        <h6>
+            DISCLAIMER: I have not yet added censoring to manga titles in the predicted table of the database.
+            Because of this, I have no control over what titles are scraped from the Random Manga functionality of this application.
+            That modal works by taking the first 5, 10, or the entire page of latest manga from Manganato at any time.
+            I have no control over what manga has recently released and may be inserted into the database.
+            As well, though I will go into more detail below, the wikipedia scraper is not yet perfect and has a tendency to choose a completely unrelated page compared to the title searched for.
+        </h6>
+        <h6>
+            This project was started after realizing that my ratings given on my manga spreadsheet followed a seemingly normal distribution.
+        </h6>
+        {{ratings_original_spreadsheet}}
+        <h6>
+            With this discovery, I wanted to see if I could create a model using my data from my spreadsheet and possibly predict what I would rate a manga that I haven't read yet.
+            However, this already yields an issue with creating a model, in that I'm attempting to create a model that will predict my own bias on rating.
+            Though this may technically be an issue, I still wanted to see what could happen and began this project.
+        </h6>
+        <h6>
+            As I've created the first renditions of this model, I've noticed that the model has appeared to have gotten more accurate to a degree.
+            Statistics concerning the model will be given below; however, the model appears to be able to give ratings from 4-7 the most often, but has had the ability to rate lower.
+            Very rarely, I've seen the current model give a rating of an 8 or higher, which does seem to to be accurate to my own ratings, having only given 3 titles a 10.
+        </h6>
+        <h6>
+            I originally tried to perform manual model selection using logistic regression as my primary model. I attempted to use the H2o library to tune my model selection and achieved mixed results.
+        </h6>
+        {{image of first results and some actual ratings}}
+        <h6>
+            The model chosen through this manual method appeared to be somewhat accurate, but was usually off by two ratings either above or below.
+            Personally, for a model meant to predict my own biased rating, I was not unhappy with this. After further research on the H2o library, seeing that it's primary use was for models with large datasets, I decided against the use of the library and went a different route.
+        </h6>
+        <h6>
+            I decided to work towards automatic model selection but knew that I needed to automate feature selection as well.
+            Currently, the automatic model selection found in manga_model.py works in the beginning by finding features for use in the model using the featurewiz library,
+             creating a heatmap and removing highly correlated variables, using lasso, manual feature selection (to be removed since more variables have been added),
+              and removing none and using the original dataset with all features.
+            Then, model selection is performed using grid search for cross validation and comparing decision trees, random forest, neural networks, logistic regression, gradient boosting, and knn means models.
+            The best model of each feature selection is chosen on accuracy rate, and the final model is chosen comparing highest r squared.
+        </h6>
+
+
+        <!-- scripts -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    </body>
+</html>

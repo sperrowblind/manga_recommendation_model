@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manga Recommendation Model</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            background-color: #261C2C;
+            color: #fafafa;
+        }
+        nav {
+            background-color: #5C527F;
+        }
+        nav .brand-logo {
+            color: #fafafa;
+        }
+        .card {
+            background-color: #3E2C41;
+            color: #fafafa;
+            width: 300px;
+            height: 400px;
+        }
+        .card-image {
+            width: 100%;
+            height: 100%;
+            background-color: #5C527F;
+        }
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background-color: #5C527F;
+        }
+        .card-action a.btn {
+            background-color: #5C527F;
+        }
+        .modal {
+            background-color: #5C527F;
+        }
+        .modal-footer .btn-flat {
+            color: #fafafa;
+        }
+        .hide {
+            display: none;
+        }
+        .material-icons.right {
+            display: inline !important;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="row">
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo center">Manga Recommendation Model Application</a>
+                <div class="card-action right-align">
+                    <a href="{{ url_for('info') }}" class="waves-effect waves-light btn" style="padding-right: 10px; margin-right: 10%;">Manga Model Info</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <h4 class="center-align">Below are several options for interacting with the model:</h4>
+        <div class="row">
+            <div class="col s12 m4">
+                <div class="card">
+                    <div class="card-image">
+                        <img src="{{ url_for('static', filename='junji_ito.jpeg') }}" alt="A beautiful image">
+                        <span class="card-title">Predict</span>
+                    </div>
+                    <div class="card-content center-align" style="background-color: #5C527F;">
+                        <p>Input a manga title and make a prediction on the rating.</p>
+                    </div>
+                    <div class="card-action center-align" style="background-color: #5C527F;">
+                        <a href="#predict-modal" class="waves-effect waves-light btn modal-trigger">Predict Rating</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 m4">
+                <div class="card">
+                    <div class="card-image">
+                        <img src="{{ url_for('static', filename='miura.jpeg') }}" alt="A beautiful image">
+                        <span class="card-title">Random Manga</span>
+                    </div>
+                    <div class="card-content center-align" style="background-color: #5C527F;">
+                        <p>Find predictions for the most recently released manga on Manganato.</p>
+                    </div>
+                    <div class="card-action center-align" style="background-color: #5C527F;">
+                        <a href="#new-manga-modal" class="waves-effect waves-light btn modal-trigger">Find New Manga</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 m4">
+                <div class="card">
+                    <div class="card-image">
+                        <img src="{{ url_for('static', filename='ONE.jpeg') }}" alt="A beautiful image">
+                        <span class="card-title">Search</span>
+                    </div>
+                    <div class="card-content center-align" style="background-color: #5C527F;">
+                        <p>Search the database and see if a title has already been predicted.</p>
+                    </div>
+                    <div class="card-action center-align" style="background-color: #5C527F;">
+                        <a href="#search-modal" class="waves-effect waves-light btn modal-trigger">Search for Manga</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- predict modal -->
+    <div id="predict-modal" class="modal" style="color: #fafafa;">
+        <div class="modal-content">
+            <div class="right-align">
+                <a href="#!" class="modal-close"><i class="material-icons" style="color: #261C2C">close</i></a>
+            </div>
+            <h4 class="center-align">Predict Rating</h4>
+            <div class="row">
+                <form id="predict-form" class="col s12">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="manga-title" name="manga-title" type="text" style="color: #fafafa">
+                            <label for="manga-title">Manga title</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s6 center-align">
+                            <button id="predict-button" class="btn waves-effect waves-light" type="button" style="color: #fafafa; background-color: #261C2C; display: inline;">Predict
+                                <i class="material-icons right">search</i>
+                            </button>
+                        </div>
+                        <div class="col s6 center-align">
+                            <button id="upload-button" class="btn waves-effect waves-light" type="button" style="color: #fafafa; background-color: #261C2C; display: inline;">Upload CSV
+                                <i class="material-icons right">upload</i>
+                                <div class="file-field input-field">
+                                    <input type="file" id="csv-file" name="file" accept=".csv">
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="magnifying-glass-predict" class="hide center-align">
+            <img src="{{ url_for('static', filename='magnifying_glass.gif') }}" alt="Magnifying_Glass" animated>
+        </div>
+        <div id="prediction" style="padding: 20px;"></div>
+        <div class="modal-footer" style="background-color: #6E85B2; padding-top: 20px;">
+            <h6 class="center-align" style="position: relative; bottom: 12px;">
+                Enter titles separated by commas (,) or upload a csv containing titles in a single column
+            </h6>
+        </div>
+    </div>
+
+    <!-- new manga modal -->
+    <div id="new-manga-modal" class="modal" style="color: #fafafa;">
+        <div class="modal-content">
+            <div class="right-align">
+                <a href="#!" class="modal-close"><i class="material-icons" style="color: #261C2C">close</i></a>
+            </div>
+            <h4 class="center-align">Find New Manga</h4>
+            <div class="row center-align valign-wrapper" style="height: 200%; margin-top: 80px;">
+                <div class="col s12 m4">
+                    <button id="new-manga-button-5" class="btn waves-effect waves-light" type="button" style="color: #fafafa; background-color: #261C2C;">Find Manga (5)
+                        <i class="material-icons right">search</i>
+                    </button>
+                </div>
+                <div class="col s12 m4">
+                    <button id="new-manga-button-10" class="btn waves-effect waves-light" type="button" style="color: #fafafa; background-color: #261C2C;">Find Manga (10)
+                        <i class="material-icons right">search</i>
+                    </button>
+                </div>
+                <div class="col s12 m4">
+                    <button id="new-manga-button" class="btn waves-effect waves-light" type="button" style="color: #fafafa; background-color: #261C2C;">Find Manga All
+                        <i class="material-icons right">search</i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="magnifying-glass-new" class="hide center-align">
+            <img src="{{ url_for('static', filename='magnifying_glass.gif') }}" alt="Magnifying_Glass" animated>
+        </div>
+        <div id="new-manga-results" style="padding: 20px;"></div>
+        <div class="modal-footer" style="background-color: #6E85B2; padding-top: 20px;">
+            <h6 class="center-align" style="position: relative; bottom: 12px;">
+                The more manga are predicted, the longer the scraper will be working
+            </h6>
+        </div>
+    </div>
+
+
+    <!-- search modal -->
+    <div id="search-modal" class="modal" style="color: #fafafa;">
+        <div class="modal-content">
+            <div class="right-align">
+                <a href="#!" class="modal-close"><i class="material-icons" style="color: #261C2C">close</i></a>
+            </div>
+            <h4 class="center-align">Search for Manga</h4>
+            <div class="row">
+                <form id="search-form" class="col s12">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="search" name="search" type="text" style="color: #fafafa">
+                            <label for="search">Manga title</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12 center-align">
+                            <button id="search-button" class="btn waves-effect waves-light" type="button" style="color: #fafafa; background-color: #261C2C;">Search
+                                <i class="material-icons right">search</i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="found_search" style="padding: 20px;"></div>
+        <div class="modal-footer" style="background-color: #6E85B2; padding-top: 20px;">
+            <h6 class="center-align" style="position: relative; bottom: 12px;">
+                Search for individual manga titles in the original and predicted data
+            </h6>
+        </div>
+    </div>
+
+    <!-- scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        document.getElementById('new-manga-button-5').addEventListener('click', function() {
+            document.getElementById('magnifying-glass-new').classList.remove('hide');
+
+            const controller = new AbortController();
+            const signal = controller.signal;
+
+            fetch('/new_manga?limit=5', {signal})
+                .then(function(response) {
+                    return response.text();
+                })
+                .then(function(data) {
+                    document.getElementById('new-manga-results').innerHTML = data;
+                    document.getElementById('magnifying-glass-new').classList.add('hide');
+                })
+                .catch(function(error) {
+                    console.error(error);
+                });
+
+            // Abort the fetch if the modal is closed
+            $('.modal-close').click(function() {
+                controller.abort();
+            });
+        });
+
+        document.getElementById('new-manga-button-10').addEventListener('click', function() {
+            document.getElementById('magnifying-glass-new').classList.remove('hide');
+
+            const controller = new AbortController();
+            const signal = controller.signal;
+
+            fetch('/new_manga?limit=10', {signal})
+                .then(function(response) {
+                    return response.text();
+                })
+                .then(function(data) {
+                    document.getElementById('new-manga-results').innerHTML = data;
+                    document.getElementById('magnifying-glass-new').classList.add('hide');
+                })
+                .catch(function(error) {
+                    console.error(error);
+                });
+
+            // Abort the fetch if the modal is closed
+            $('.modal-close').click(function() {
+                controller.abort();
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('.modal');
+            var instances = M.Modal.init(elems);
+
+            var modalOverlays = document.querySelectorAll('.modal-overlay');
+            modalOverlays.forEach(function(modalOverlay) {
+                modalOverlay.addEventListener('click', function() {
+                    document.getElementById("magnifying-glass-new").classList.add("hide");
+                    $('#new-manga-results').empty();
+                    document.getElementById("magnifying-glass-predict").classList.add("hide");
+                    $('#predict-form')[0].reset();
+                    $('#prediction').empty();
+                    $('#search-form')[0].reset();
+                    $('#found_search').empty();
+                    $('#new_manga').empty();
+                });
+            })
+
+            $('#new-manga-button').click(function() {
+                $('#new-manga-results').empty();
+                document.getElementById("magnifying-glass-new").classList.remove("hide");
+
+                const controller = new AbortController();
+                const signal = controller.signal;
+
+                fetch('/new_manga', {signal})
+                    .then(function(response) {
+                        return response.text();
+                    })
+                    .then(function(data) {
+                        document.getElementById("magnifying-glass-new").classList.add("hide");
+                        $('magnifying-glass-new').addClass('hide');
+                        $('#new-manga-results').html(data);
+                    })
+                    .catch(function(error) {
+                        console.error(error);
+                    });
+
+                // Abort the fetch if the modal is closed
+                $('.modal-close').click(function() {
+                    controller.abort();
+                });
+            });
+        });
+
+        document.getElementById('upload-button').addEventListener('click', function() {
+            document.getElementById('csv-file').click();
+        });
+
+        document.getElementById('csv-file').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            var formData = new FormData();
+            formData.append('file', file);
+            $('#prediction').empty();
+
+            document.getElementById("magnifying-glass-predict").classList.remove("hide");
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                return response.text();
+            })
+            .then(data => {
+                document.getElementById("magnifying-glass-predict").classList.add("hide");
+                $('#prediction').append(data);
+            })
+            .catch(error => console.error(error));
+            $('#prediction').append(response);
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('.modal');
+            var instances = M.Modal.init(elems);
+
+            var modalOverlays = document.querySelectorAll('.modal-overlay');
+            modalOverlays.forEach(function(modalOverlay) {
+                modalOverlay.addEventListener('click', function() {
+                    document.getElementById("magnifying-glass-predict").classList.add("hide");
+                    $('#predict-form')[0].reset();
+                    $('#prediction').empty();
+                });
+            })
+
+            $('#predict-button').click(function() {
+                $('#prediction').empty();
+
+                document.getElementById("magnifying-glass-predict").classList.remove("hide");
+
+                var searchData = $('#predict-form').serialize();
+                $.ajax({
+                    url: '/predict',
+                    type: 'POST',
+                    data: searchData,
+                    success: function(data) {
+                        document.getElementById("magnifying-glass-predict").classList.add("hide");
+                        $('#prediction').append(data);
+                    }
+                });
+            });
+        });
+        document.getElementById("manga-title").addEventListener("keypress", function(event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                document.getElementById("predict-button").click();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('.modal');
+            var instances = M.Modal.init(elems);
+
+            var modalOverlays = document.querySelectorAll('.modal-overlay');
+            modalOverlays.forEach(function(modalOverlay) {
+                modalOverlay.addEventListener('click', function() {
+                    $('#search-form')[0].reset();
+                    $('#found_search').empty();
+                    document.getElementById("magnifying-glass").classList.add("hide");
+                });
+            });
+
+            $('.modal-close').click(function(e) {
+                if ($('#search').val() === '') {
+                    e.preventDefault();
+                }
+                document.getElementById("magnifying-glass-predict").classList.add("hide");
+                document.getElementById("magnifying-glass-new").classList.add("hide");
+                $('.modal').modal('close');
+                $('#search-form')[0].reset();
+                $('#found_search').empty();
+                $('#predict-form')[0].reset();
+                $('#prediction').empty();
+                $('#new_manga').empty();
+            });
+
+            $(document).click(function(event) {
+                var target = $(event.target);
+                if (!target.closest('.modal').length && !target.is('.modal')) {
+                    document.getElementById("magnifying-glass-predict").classList.add("hide");
+                    document.getElementById("magnifying-glass-new").classList.add("hide");
+                    $('#search-form')[0].reset();
+                    $('#found_search').empty();
+                    $('#predict-form')[0].reset();
+                    $('#prediction').empty();
+                    $('#new-manga-results').empty();
+                }
+            });
+
+            $('#search-button').click(function() {
+                var searchData = $('#search-form').serialize();
+                $.ajax({
+                    url: '/search',
+                    type: 'POST',
+                    data: searchData,
+                    success: function(data) {
+                        $('#found_search').html(data);
+                    }
+                });
+            });
+
+            $('#search').keypress(function(e) {
+                if (e.which == 13) {
+                    $('#search-button').click();
+                    return false;
+                }
+            });
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</body>
+</html>
