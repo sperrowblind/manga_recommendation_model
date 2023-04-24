@@ -22,3 +22,4 @@ var/
 read_manga.csv
 final_data.csv
 model_df.csv
+manga_recommendation_database.sqlite

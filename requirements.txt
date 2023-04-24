@@ -1,0 +1,12 @@
+bs4
+requests
+pkl
+difflib
+flask
+pandas
+numpy
+featurewiz
+sklearn
+keras
+re
+wikipedia

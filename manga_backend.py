@@ -1,10 +1,10 @@
 from flask import Flask, request, render_template
 import pandas as pd
-from manga_scraper import connect_db, scrape_manga
-from manga_data_transform import transform_data, columns_for_model
-from utils.predict_route_utils import load_model
-from utils.search_route_utils import search_find_matches
-from utils.new_manga_route_utils import find_latest_manga_recommendations
+from .manga_pipeline.manga_scraper import connect_db, scrape_manga
+from .manga_pipeline.manga_data_transform import transform_data, columns_for_model
+from .backend_utils.predict_route_utils import load_model
+from .backend_utils.search_route_utils import search_find_matches
+from .backend_utils.new_manga_route_utils import find_latest_manga_recommendations
 
 
 app = Flask(__name__, static_url_path='/static')

@@ -1,5 +1,4 @@
 import pandas as pd
-
 from manga_data_transform import connect_db
 
 

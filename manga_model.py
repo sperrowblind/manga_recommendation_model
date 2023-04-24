@@ -17,7 +17,7 @@ import pickle
 from keras import backend as K
 from keras import layers, models, regularizers
 
-from manga_scraper import connect_db
+from manga_pipeline.manga_scraper import connect_db
 
 ## This file will be used to find the best model for use in recommendation
 

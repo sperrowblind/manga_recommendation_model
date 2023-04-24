@@ -3,6 +3,7 @@ from manga_data_transform import transform_data
 import sqlite3
 from sqlite3 import Error
 import pandas as pd
+from os import getenv
 pd.options.mode.chained_assignment = None
 
 def connect_db():
@@ -15,7 +16,8 @@ def connect_db():
 if __name__ == '__main__':
 
     with connect_db() as con:
-        read_manga = pd.read_csv('read_manga.csv')
+        data_csv = getenv('MODEL_DATA')
+        read_manga = pd.read_csv(data_csv)
         read_manga.to_sql("model_data_raw", con, if_exists="replace")
     scrape_manga()
     transform_data()

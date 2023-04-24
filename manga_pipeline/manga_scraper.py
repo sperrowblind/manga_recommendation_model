@@ -51,11 +51,11 @@ def manganato_url_scrape(manga_list=None):
     df_search['manganato_url'] = df_search['url_name'].apply(scrape_manganato_url)
 
     manual_input_manganato = df_search[df_search['manganato_url'].isnull()]
-    manual_input_manganato.to_csv('manganato_manual_input.csv')
+    #manual_input_manganato.to_csv('manganato_manual_input.csv')
     with connect_db() as con:
         manual_input_manganato.to_sql("manganato_manual_input_needed", con, if_exists="replace")
 
-    df_search.to_csv('test.csv')
+    #df_search.to_csv('test.csv')
     return df_search
 
 def manganato_info_search(df_search):
@@ -161,7 +161,7 @@ def manganato_info_search(df_search):
         manganato_info = manganato_info.drop(['author', 'genre'], axis=1)
 
     manganato_info = manganato_info.drop_duplicates()
-    manganato_info.to_csv('test_2.csv')
+    #manganato_info.to_csv('test_2.csv')
 
     return manganato_info
 
@@ -222,10 +222,10 @@ def wiki_url_scrape(manganato_info):
             df_wiki.loc[index, 'wiki_url'] = 'https://en.wikipedia.org/wiki/' + df_wiki.loc[index, 'Title'].strip().replace(' ', '_')
 
     manual_input_wiki = df_wiki[df_wiki['wiki_url'] == 'None']
-    manual_input_wiki.to_csv('manual_input_wiki.csv')
+    #manual_input_wiki.to_csv('manual_input_wiki.csv')
     with connect_db() as con:
         manual_input_wiki.to_sql("wiki_manual_input_needed", con, if_exists="replace")
-    df_wiki.to_csv('test_3.csv')
+    #df_wiki.to_csv('test_3.csv')
     return df_wiki
 
 def wiki_info_search(df_wiki):
@@ -318,7 +318,7 @@ def wiki_info_search(df_wiki):
 
 
     manga_info_df = pd.DataFrame(manga_info_df, columns=['wiki_url', 'wiki_genres', 'wiki_original_publisher', 'wiki_english_publisher', 'wiki_magazine', 'wiki_demographic', 'wiki_original_run', 'wiki_volumes'])
-    manga_info_df.to_csv('test_wiki.csv')
+    #manga_info_df.to_csv('test_wiki.csv')
     for index, row in manga_info_df.iterrows():
         try:
             manga_info_df.loc[index, 'wiki_genres'].remove('[1]')
@@ -390,7 +390,7 @@ def wiki_info_search(df_wiki):
 
 
 
-    manga_info_df.to_csv('test_4.csv')
+    #manga_info_df.to_csv('test_4.csv')
 
 
     wiki_urls = df_wiki[df_wiki['wiki_url'] != None]
@@ -535,7 +535,7 @@ def wiki_info_search(df_wiki):
             df = df.drop([column], axis=1)
 
     df = df.drop_duplicates()
-    df.to_csv("scraped_data.csv")
+    #df.to_csv("scraped_data.csv")
     with connect_db() as con:
         df.to_sql("scraped_data", con, if_exists="replace")
     return df
@@ -547,9 +547,9 @@ def scrape_manga(manga_list=None):
     df = manganato_info_search(df)
     print('FOUND MANGANATO INFO')
     df = wiki_url_scrape(df)
-    print('FOUND wiki urls')
+    print('FOUND WIKI URLS')
     df = wiki_info_search(df)
-    print('found wiki info')
+    print('FOUND WIKI INFO')
     return df
 
 

@@ -5,7 +5,7 @@ import sqlite3
 from sqlite3 import Error
 import os
 
-from manga_scraper import clean_title
+from .manga_scraper import clean_title
 
 
 def connect_db():
