@@ -2,6 +2,7 @@ from featurewiz import featurewiz
 import pandas as pd
 from pandas import DataFrame
 import numpy as np
+import os
 
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -468,12 +469,15 @@ if __name__ == '__main__':
     best_r2 = -float('inf')
     best_model_df = None
 
+    if not os.path.exists('csvs'):
+        os.makedirs('csvs')
+
     for model in range(0,len(models)):
         x_train, x_test, y_train, y_test = train_test_split(x[dfs[model].columns], y, test_size=0.1, random_state=2340)
         y_pred = models[model].predict(x_test)
 
         df_predictions = pd.DataFrame(y_pred, columns = ['predicted_rating'])
-        df_predictions.to_csv(f'{str(models[model])}_predictions.csv')
+        df_predictions.to_csv(os.path.join('csvs', f'{str(models[model])}_predictions.csv'))
 
         r2 = r2_score(y_test, y_pred)
         print(r2)
@@ -484,6 +488,6 @@ if __name__ == '__main__':
             best_model_df = dfs[model]
             best_r2 = r2
 
-    best_model_df.to_csv('model_df.csv')
+    best_model_df.to_csv(os.path.join('csvs', 'model_df.csv'))
     with open('final_model.pkl', 'wb') as f:
         pickle.dump(best_model, f)

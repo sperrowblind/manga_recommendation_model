@@ -1,17 +1,9 @@
-from manga_scraper import scrape_manga
-from manga_data_transform import transform_data
-import sqlite3
-from sqlite3 import Error
+from manga_pipeline.manga_scraper import scrape_manga
+from manga_pipeline.manga_data_transform import transform_data, connect_db
 import pandas as pd
 from os import getenv
 pd.options.mode.chained_assignment = None
 
-def connect_db():
-    try:
-        con = sqlite3.connect("manga_recommendation_database.sqlite")
-    except Error as con:
-        pass
-    return con
 
 if __name__ == '__main__':
 
@@ -20,5 +12,6 @@ if __name__ == '__main__':
         read_manga = pd.read_csv(data_csv)
         read_manga.to_sql("model_data_raw", con, if_exists="replace")
     scrape_manga()
+    print("BEGINNING TRANSFORMING DATA")
     transform_data()
 

@@ -1,6 +1,5 @@
 bs4
 requests
-pkl
 difflib
 flask
 pandas
@@ -10,3 +9,4 @@ sklearn
 keras
 re
 wikipedia
+pytest

@@ -1,10 +1,14 @@
 from flask import Flask, request, render_template
 import pandas as pd
+import io
+import base64
+
 from .manga_pipeline.manga_scraper import connect_db, scrape_manga
 from .manga_pipeline.manga_data_transform import transform_data, columns_for_model
 from .backend_utils.predict_route_utils import load_model
 from .backend_utils.search_route_utils import search_find_matches
 from .backend_utils.new_manga_route_utils import find_latest_manga_recommendations
+from .backend_utils.info_route_utils import get_predicted_titles_per_rating_graph
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -68,6 +72,7 @@ def new_manga():
     titles = find_latest_manga_recommendations(limit)
     try:
         df = scrape_manga(titles)
+        print('BEGINNING TO TRANSFORM DATA')
         df = transform_data(df)
 
         # Load the pkl model
@@ -132,4 +137,5 @@ def search():
 
 @app.route('/info', methods=['GET'])
 def info():
-    return render_template('model_info.html')
+    predicted_vs_rating = get_predicted_titles_per_rating_graph()
+    return render_template('model_info.html', graph_image_data=predicted_vs_rating)

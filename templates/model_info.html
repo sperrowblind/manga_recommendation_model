@@ -71,9 +71,9 @@
             This section was last updated on April 22, 2023.
         </h6>
         <h6>
-            DISCLAIMER: I have not yet added censoring to manga titles in the predicted table of the database.
+            DISCLAIMER: I have not yet added censoring to manga titles in the predicted_data table of the database.
             Because of this, I have no control over what titles are scraped from the Random Manga functionality of this application.
-            That modal works by taking the first 5, 10, or the entire page of latest manga from Manganato at any time.
+            That modal works by taking the first 5, 10, or entire page of latest manga from Manganato at any time.
             I have no control over what manga has recently released and may be inserted into the database.
             As well, though I will go into more detail below, the wikipedia scraper is not yet perfect and has a tendency to choose a completely unrelated page compared to the title searched for.
         </h6>
@@ -81,7 +81,7 @@
             This project was started after realizing that my ratings given on my manga spreadsheet followed a seemingly normal distribution.
         </h6>
         <h1>
-            //ratings_original_spreadsheet//
+            <img src="{{ url_for('static', filename='count_of_rating.jpeg') }}" alt="A beautiful image">
         </h1>
         <h6>
             With this discovery, I wanted to see if I could create a model using my data from my spreadsheet and possibly predict what I would rate a manga that I haven't read yet.
@@ -97,8 +97,9 @@
             I originally tried to perform manual model selection using logistic regression as my primary model. I attempted to use the H2o library to tune my model selection and achieved mixed results.
         </h6>
         <h1>
-            //image of first results and some actual ratings//
+            <img src="{{ url_for('static', filename='h2o_predicted_vs_actual.jpeg') }}" alt="Image of predicted vs actual rating for titles by h2o model">
         </h1>
+        <img src="data:image/png;base64,{{ graph_image_data }}" alt="Graph">
         <h6>
             The model chosen through this manual method appeared to be somewhat accurate, but was usually off by two ratings either above or below.
             Personally, for a model meant to predict my own biased rating, I was not unhappy with this. After further research on the H2o library, seeing that it's primary use was for models with large datasets, I decided against the use of the library and went a different route.

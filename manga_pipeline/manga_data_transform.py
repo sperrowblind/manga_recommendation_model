@@ -38,7 +38,7 @@ def transform_data(df_transform = None):
 
     if df_transform is None:
         final_df = df
-        original_data_set = 'read_manga.csv'
+        original_data_set = os.getenv('MODEL_DATA')
         if os.path.exists(original_data_set):
             custom_columns = pd.read_csv(original_data_set, usecols=['Title', 'Rating', 'Count of Title Characters'])
             custom_columns['Title'] = custom_columns['Title'].apply(clean_title)
@@ -80,12 +80,15 @@ def transform_data(df_transform = None):
         if column in columns_to_delete:
             final_df.drop([column], axis=1, inplace=True)
 
+    if not os.path.exists('csvs'):
+        os.makedirs('csvs')
+
     if df_transform is None:
-        final_df.to_csv('final_data.csv')
+        final_df.to_csv(os.path.join('csvs', 'final_data.csv'))
         with connect_db() as con:
             final_df.to_sql("model_data", con, if_exists="replace")
     else:
-        final_df.to_csv('new_transformed_data.csv')
+        final_df.to_csv(os.path.join('csvs', 'new_transformed_data.csv'))
     return final_df
 
 def columns_for_model(df):
