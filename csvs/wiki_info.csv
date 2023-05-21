@@ -1,11 +1,49 @@
 ,wiki_url,wiki_genres,wiki_original_publisher,wiki_english_publisher,wiki_magazine,wiki_demographic,wiki_original_run,wiki_volumes
-0,https://en.wikipedia.org/wiki/Dead_Mount_Death_Play,['wiki_action'],['square enix'],['na yen press'],['young gangan'],['seinen'],"['october 20, 2017', '– present']","['11', '(list of volumes)']"
-1,https://en.wikipedia.org/wiki/Saiyuki_(manga),['wiki_adventure'],['enix'],"['aus madman entertainment', 'na tokyopop (formerly)kodansha usa (current)']",['monthly g-fantasy'],['shōnen'],"['1997', '–', '2002']","['9', '(list of volumes)']"
-2,https://en.wikipedia.org/wiki/The_Kindaichi_Case_Files,['wiki_mystery'],['kodansha'],['na tokyopop'],"['weekly shōnen magazine (october 28, 1992–october 18, 2017)evening (january 23, 2018–february 28, 2023)comic days (april 26, 2023–present)']","['shōnen', ',', 'seinen']","['october 28, 1992', '– present']","['90', '(list of volumes)']"
-3,https://en.wikipedia.org/wiki/Vagabond_(manga),['wiki_epic'],['kodansha'],"['aus madman entertainment', 'na viz media']",['morning'],['seinen'],"['september 17, 1998', '–', 'may 21, 2015 (on hiatus)']","['37', '(list of volumes)']"
-4,https://en.wikipedia.org/wiki/Shy_(manga),"['wiki_action', 'wiki_superhero']",['akita shoten'],['na yen press'],['weekly shōnen champion'],['shōnen'],"['august 1, 2019', '– present']","['19', '(list of volumes)']"
-5,https://en.wikipedia.org/wiki/Watashi-Tachi_Ga_Koisuru_Riyuu,,,,,,,
-6,https://en.wikipedia.org/wiki/X_(manga),['wiki_action'],['kadokawa shoten'],"['aus madman entertainment', 'na viz media']",['monthly asuka'],['shōjo'],"['may 1992', '–', 'march 2003[a]']","['18', '(list of volumes)']"
-7,https://en.wikipedia.org/wiki/Tona-Gura!,['wiki_romantic comedy'],['jive'],,['comic rush'],['shōnen'],"['january 2004', '–', 'july 2011']","['13', '(list of volumes)']"
-8,"https://en.wikipedia.org/wiki/The_Loyal_Knight_Killed_Me._After_Changing_To_A_Yandere,_He_Is_Still_Fixated_On_Me",,,,,,,
-9,https://en.wikipedia.org/wiki/Dragon_Ball_(manga),['wiki_adventure'],['shueisha'],"['aus madman entertainment', 'na/uk\n  viz media']",['weekly shōnen jump'],['shōnen'],"['december 3, 1984', '–', 'june 5, 1995']","['42', '(list of volumes)']"
+0,https://en.wikipedia.org/wiki/Goodnight_Punpun,"['wiki_coming-of-age', 'wiki_drama', 'wiki_slice of life']",Shogakukan,NA Viz Media,"Weekly Young Sunday(March 15, 2007–July 31, 2008)Weekly Big Comic Spirits(October 20, 2008–November 2, 2013)",Seinen,"March 15, 2007 – November 2, 2013",13 (List of volumes)
+1,https://en.wikipedia.org/wiki/Chainsaw_Man,"['wiki_action', 'wiki_comedy horror', 'wiki_dark fantasy']",Shueisha,NA Viz Media,"Weekly Shōnen Jump(December 3, 2018 – December 14, 2020)Shōnen Jump+(July 13, 2022 – present)",Shōnen,"December 3, 2018 – present",14 (List of volumes)
+2,https://en.wikipedia.org/wiki/Berserk_(manga),"['wiki_dark fantasy', 'wiki_epic fantasy', 'wiki_sword and sorcery']",Hakusensha,NA Dark Horse Comics,Monthly Animal House(1989–1992)Young Animal(1992–present),Seinen,August 1989 – present,41 (List of volumes)
+3,https://en.wikipedia.org/wiki/Demon_Slayer:_Kimetsu_no_Yaiba,"['wiki_adventure', 'wiki_dark fantasy', 'wiki_martial arts']",Shueisha,NA Viz Media,Weekly Shōnen Jump,Shōnen,"February 15, 2016 – May 18, 2020",23 (List of volumes)
+4,https://en.wikipedia.org/wiki/Blade_of_the_Immortal,"['wiki_dark fantasy', 'wiki_epic fantasy', 'wiki_historical fantasy']",Kodansha,NA Dark Horse Comics,Monthly Afternoon,Seinen,"June 25, 1993 – December 25, 2012",30 (List of volumes)
+5,https://en.wikipedia.org/wiki/The_Promised_Neverland,"['wiki_dark fantasy', 'wiki_science fiction', 'wiki_thriller']",Shueisha,NA Viz Media,Weekly Shōnen Jump,Shōnen,"August 1, 2016 – June 15, 2020",20 (List of volumes)
+6,https://en.wikipedia.org/wiki/Crime_and_Punishment:_A_Falsified_Romance,[],Futabasha,JManga,Manga Action,Seinen,"January 23, 2007 – March 15, 2011",10 (List of volumes)
+7,https://en.wikipedia.org/wiki/Blade_of_the_Phantom_Master,"['wiki_action', 'wiki_epic fantasy']",Daewon C.I. (South Korea)Shogakukan (Japan),,Young Champ (South Korea)Monthly Sunday Gene-X (Japan),Seinen,"March 19, 2001 – August 18, 2007",17 + 1 Shin Angyo Onshi Gaiden
+8,https://en.wikipedia.org/wiki/No_Longer_Human_(Ito_manga),['wiki_psychological horror'],Shogakukan,NA Viz Media,Big Comic Original,Seinen,"May 2, 2017 – April 20, 2018",3 (List of volumes)
+9,https://en.wikipedia.org/wiki/Drifting_Net_Cafe,"['wiki_science fiction', 'wiki_mystery', 'wiki_romance']",Futabasha,,Manga Action,Seinen,"February 28, 2009 – June 28, 2011",7
+10,https://en.wikipedia.org/wiki/Innocent_(manga),"['wiki_historical', 'wiki_suspense']",Shueisha,NA Dark Horse Comics,Weekly Young Jump,Seinen,"January 31, 2013 – April 16, 2015",9 (List of volumes)
+11,https://en.wikipedia.org/wiki/Ajin:_Demi-Human,"['wiki_action', 'wiki_dark fantasy', 'wiki_supernatural thriller']",Kodansha,NA Vertical,Good! Afternoon,Seinen,"July 6, 2012 – February 5, 2021",17 (List of volumes)
+12,https://en.wikipedia.org/wiki/Kokou_no_Hito,[],Shueisha,,Weekly Young Jump,Seinen,1 November 2007 – 27 October 2011,17 (List of volumes)
+13,https://en.wikipedia.org/wiki/What_a_Wonderful_World!,"['wiki_comedy', 'wiki_slice of life']",Shogakukan,Viz Media,Monthly Sunday Gene-X,Seinen,June 2002 – April 2004,2
+14,https://en.wikipedia.org/wiki/School-Live!,"['wiki_horror', 'wiki_psychological thriller', 'wiki_slice of life']",Houbunsha,NA Yen Press,Manga Time Kirara Forward,Seinen,"May 24, 2012 – November 22, 2019",12 (List of volumes)
+15,https://en.wikipedia.org/wiki/Homunculus_(manga),"['wiki_psychological horror', 'wiki_psychological thriller']",Shogakukan,NA Seven Seas Entertainment,Weekly Big Comic Spirits,Seinen,"March 17, 2003 – February 21, 2011",15 (List of volumes)
+16,https://en.wikipedia.org/wiki/Attack_on_Titan,"['wiki_action', 'wiki_dark fantasy', 'wiki_post-apocalyptic']",Kodansha,NA Kodansha USA,Bessatsu Shōnen Magazine,Shōnen,"September 9, 2009 – April 9, 2021",34 (List of volumes)
+17,https://en.wikipedia.org/wiki/Innocent_(manga),"['wiki_historical', 'wiki_suspense']",Shueisha,NA Dark Horse Comics,Weekly Young Jump,Seinen,"January 31, 2013 – April 16, 2015",9 (List of volumes)
+18,https://en.wikipedia.org/wiki/Fire_Punch,"['wiki_dark fantasy', 'wiki_dystopian', 'wiki_supernatural thriller']",Shueisha,NA Viz Media,Shōnen Jump+,Shōnen,"April 18, 2016 – January 1, 2018",8 (List of volumes)
+19,https://en.wikipedia.org/wiki/My_Hero_Academia:_Vigilantes,"['wiki_adventure', 'wiki_science fantasy', 'wiki_superhero']",Shueisha,NA Viz Media,Jump GIGAShōnen Jump+,Shōnen,"August 20, 2016 – May 28, 2022",15 (List of volumes)
+20,https://en.wikipedia.org/wiki/Tatsuki_Fujimoto_Before_Chainsaw_Man,"['wiki_fantasy comedy', 'wiki_horror']",Shueisha,NA Viz Media,,Shōnen,,2 (List of volumes)
+21,https://en.wikipedia.org/wiki/Creature!,['wiki_horror'],Akita Shoten,NA Media Do [ja] (digital),Monthly Shōnen Champion,Shōnen,"April 6, 2010 – June 6, 2017",21 (List of volumes)
+22,https://en.wikipedia.org/wiki/Ichi_the_Killer_(manga),"['wiki_action', 'wiki_psychological thriller', 'wiki_yakuza']",Shogakukan,,Weekly Young Sunday,Seinen,1998 – 2001,1
+23,https://en.wikipedia.org/wiki/School-Live!,"['wiki_horror', 'wiki_psychological thriller', 'wiki_slice of life']",Houbunsha,NA Yen Press,Manga Time Kirara Forward,Seinen,"May 24, 2012 – November 22, 2019",12 (List of volumes)
+24,https://en.wikipedia.org/wiki/As_the_Gods_Will,"['wiki_psychological thriller', 'wiki_survival']",Kodansha,NA Kodansha USA,Bessatsu Shōnen Magazine,Shōnen,2011 – 2012,5
+25,https://en.wikipedia.org/wiki/Ibitsu,[],Akita Shoten,,Young Champion,Seinen,"August 20, 2010 – March 19, 2013",7
+26,https://en.wikipedia.org/wiki/Shigurui,[],Akita Shoten,,Champion Red(2003−2006)Champion Red Ichigo(2007−2010),Seinen,August 2003 – September 2010,15 (List of volumes)
+27,https://en.wikipedia.org/wiki/I_Am_a_Hero,"['wiki_action', 'wiki_horror', 'wiki_psychological thriller']",Shogakukan,NA Dark Horse Comics,Weekly Big Comic Spirits,Seinen,"April 27, 2009 – February 27, 2017",22 (List of volumes)
+28,https://en.wikipedia.org/wiki/Zetman,"['wiki_action', 'wiki_science fiction', 'wiki_superhero']",Shueisha,,Weekly Young Jump,Seinen,"October 31, 2002 – July 24, 2014",20 (List of volumes)
+29,https://en.wikipedia.org/wiki/Uzumaki,"['wiki_dark fantasy', 'wiki_psychological horror', 'wiki_supernatural']",Shogakukan,NA Viz Media,Big Comic Spirits,Seinen,"January 19, 1998 – August 30, 1999",3 (List of volumes)
+30,https://en.wikipedia.org/wiki/Himizu_(manga),['wiki_psychological drama'],Kodansha,,Weekly Young Magazine,Seinen,"January 29, 2001 – March 11, 2002",4 (List of volumes)
+31,https://en.wikipedia.org/wiki/Claymore_(manga),"['wiki_adventure', 'wiki_dark fantasy', 'wiki_sword and sorcery']",Shueisha,AUS Madman EntertainmentNA Viz Media,"Monthly Shōnen Jump(June 6, 2001–June 6, 2007)Weekly Shōnen Jump(July 2–October 6, 2007)Jump Square(November 2, 2007–October 4, 2014)",Shōnen,"June 6, 2001 – October 4, 2014",27 (List of volumes)
+32,https://en.wikipedia.org/wiki/Ichi_the_Killer_(manga),"['wiki_action', 'wiki_psychological thriller', 'wiki_yakuza']",Shogakukan,,Weekly Young Sunday,Seinen,1998 – 2001,1
+33,https://en.wikipedia.org/wiki/Assassination_Classroom,"['wiki_action', 'wiki_science fiction comedy']",Shueisha,NA Viz Media,Weekly Shōnen Jump,Shōnen,"July 2, 2012 – March 25, 2016",21 (List of volumes)
+34,https://en.wikipedia.org/wiki/Gyo,"['wiki_horror', 'wiki_supernatural']",Shogakukan,NA Viz Media,Big Comic Spirits,Seinen,"November 12, 2001 – April 15, 2002",2 (List of volumes)
+35,https://en.wikipedia.org/wiki/Rainbow:_Nisha_Rokub%C5%8D_no_Shichinin,['wiki_prison drama'],Shogakukan,,"Weekly Young Sunday(November 21, 2002–July 31, 2008)Weekly Big Comic Spirits(June 15, 2009–January 4, 2010)",Seinen,"November 21, 2002 – January 4, 2010",22 (List of volumes)
+36,https://en.wikipedia.org/wiki/Priest_(manhwa),"['wiki_action/adventure', 'wiki_weird west']",,Tokyopop (US),,,1998–2007,16
+37,https://en.wikipedia.org/wiki/Immortal_Hounds,[],Enterbrain,Vertical,Harta,Seinen,"July 13, 2013 – present",6
+38,https://en.wikipedia.org/wiki/Btooom!,"['wiki_action', 'wiki_survival']",Shinchosha,NA Yen Press,Comic Bunch,Seinen,"June 19, 2009 – March 20, 2018",26 (List of volumes)
+39,https://en.wikipedia.org/wiki/Multiple_Personality_Detective_Psycho,[],Kadokawa Shoten,NA Dark Horse Comics,Shōnen Ace (1997–2007)Comic Charge (2007–2009)Young Ace (2009–2016),"Shōnen, seinen","1997 – March 4, 2016",24
+40,https://en.wikipedia.org/wiki/Tatsuki_Fujimoto,[],,,,,,
+41,https://en.wikipedia.org/wiki/Monster_(manga),"['wiki_crime', 'wiki_mystery', 'wiki_psychological thriller']",Shogakukan,NA Viz Media,Big Comic Original,Seinen,December 1994 – December 2001,18 (List of volumes)
+42,https://en.wikipedia.org/wiki/Akira_(manga),"['wiki_cyberpunk', 'wiki_political thriller', 'wiki_post-apocalyptic']",Kodansha,AUS Madman EntertainmentNA Kodansha ComicsUK Titan Books,Young Magazine,Seinen,"December 20, 1982 – June 25, 1990",6 (List of volumes)
+43,https://en.wikipedia.org/wiki/Blue_Heaven_(manga),[],,,,,,
+44,https://en.wikipedia.org/wiki/Welcome_to_the_N.H.K.,"['wiki_black comedy', 'wiki_psychological drama', 'wiki_slice of life']",Kadokawa Shoten,NA Tokyopop,Monthly Shōnen Ace,Shōnen,"December 26, 2003 – May 26, 2007",8
+45,https://en.wikipedia.org/wiki/Dragon_Ball_(manga),"['wiki_adventure', 'wiki_comic fantasy', 'wiki_martial arts']",Shueisha,"AUS Madman Entertainment NA/UK
+  Viz Media",Weekly Shōnen Jump,Shōnen,"December 3, 1984 – June 5, 1995",42 (List of volumes)
+46,https://en.wikipedia.org/wiki/Berserk_(manga),"['wiki_dark fantasy', 'wiki_epic fantasy', 'wiki_sword and sorcery']",Hakusensha,NA Dark Horse Comics,Monthly Animal House(1989–1992)Young Animal(1992–present),Seinen,August 1989 – present,41 (List of volumes)

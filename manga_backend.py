@@ -1,10 +1,8 @@
 from flask import Flask, request, render_template
 import pandas as pd
-import io
-import base64
 
 from .manga_pipeline.manga_scraper import connect_db, scrape_manga
-from .manga_pipeline.manga_data_transform import transform_data, columns_for_model
+from .manga_pipeline.manga_data_transform import transform_data, columns_for_model, get_word_count_df
 from .backend_utils.predict_route_utils import load_model
 from .backend_utils.search_route_utils import search_find_matches
 from .backend_utils.new_manga_route_utils import find_latest_manga_recommendations
@@ -32,6 +30,7 @@ def predict():
 
         df = scrape_manga(title)
         df = transform_data(df)
+        df = get_word_count_df(df)
 
         # Load the pkl model
         model = load_model()
@@ -74,6 +73,7 @@ def new_manga():
         df = scrape_manga(titles)
         print('BEGINNING TO TRANSFORM DATA')
         df = transform_data(df)
+        df = get_word_count_df(df)
 
         # Load the pkl model
         model = load_model()

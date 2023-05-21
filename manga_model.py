@@ -19,6 +19,7 @@ from keras import backend as K
 from keras import layers, models, regularizers
 
 from manga_pipeline.manga_scraper import connect_db
+from manga_pipeline.manga_data_transform import get_word_count_df
 
 ## This file will be used to find the best model for use in recommendation
 
@@ -90,16 +91,6 @@ def lasso_get_predictors(df: DataFrame) -> DataFrame:
 
     return selected_df
 
-def manual_get_predictors(df: DataFrame) -> DataFrame:
-    manual_selection = ['Rating', 'Title', 'num_genres', 'views', 'votes', 'avg_rating', \
-        'Fujimoto Tatsuki', 'Matsumoto Jiro', 'Action', 'Adventure', 'Comedy',	'Cooking', \
-            'Drama', 'Fantasy', 'Historical', 'Horror', 'Martial arts', \
-                'Mature', 'Mecha', 'Mystery', 'One shot', 'Psychological', 'Romance', \
-                    'School life',	'Sci fi', 'Seinen', 'Shounen',	'Slice of life', 'Supernatural',\
-                         'Tragedy', 'wiki_demographic_seinen', 'wiki_demographic_shōjo', \
-                            'wiki_demographic_shōnen', 'status_ongoing']
-    selected_df = df[manual_selection]
-    return selected_df
 
 def best_decision_tree(x_train_decision: DataFrame
     , y_train_decision: DataFrame
@@ -415,18 +406,38 @@ def find_best_model(df: DataFrame, which_frame: str):
     y = df['Rating']
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=2340)
 
-    decision_tree = best_decision_tree(x_train, y_train, x_test, y_test, which_frame)
-    random_forest = best_random_forest(x_train, y_train, x_test, y_test, which_frame)
-    neural_network = best_nn(x_train, y_train, x_test, y_test, which_frame)
-    logistic = best_logistic_regression(x_train, y_train, x_test, y_test, which_frame)
-    gradient = best_gradient_boosted(x_train, y_train, x_test, y_test, which_frame)
+    try:
+        decision_tree = best_decision_tree(x_train, y_train, x_test, y_test, which_frame)
+    except:
+        decision_tree = None
+    try:
+        random_forest = best_random_forest(x_train, y_train, x_test, y_test, which_frame)
+    except:
+        random_forest = None
+    try:
+        neural_network = best_nn(x_train, y_train, x_test, y_test, which_frame)
+    except:
+        neural_network = None
+    try:
+        logistic = best_logistic_regression(x_train, y_train, x_test, y_test, which_frame)
+    except:
+        logistic = None
+    try:
+        gradient = best_gradient_boosted(x_train, y_train, x_test, y_test, which_frame)
+    except:
+        gradient = None
     #svc = best_svc(x_train, y_train, x_test, y_test, which_frame)
-    knn = best_knn(x_train, y_train, x_test, y_test, which_frame)
+    try:
+        knn = best_knn(x_train, y_train, x_test, y_test, which_frame)
+    except:
+        knn = None
 
     model_dict = {'decision': decision_tree, 'forest': random_forest, 'nn': neural_network, 'logistic': logistic, 'gradient': gradient, 'knn': knn}
     performance_dict = {}
     x_test = x_test.drop(['Title', 'Rating'], axis=1)
     for model_name, model in model_dict.items():
+        if model == None:
+            continue
         y_pred = model.predict(x_test)
         if model_name == 'nn':
             y_pred_int = np.round(y_pred * 8)
@@ -445,23 +456,42 @@ if __name__ == '__main__':
 
     df = get_data()
 
+    word_df = df[['Title', 'description', 'Rating']]
+    word_df = get_word_count_df(word_df)
+
+    df_with_nltk = get_word_count_df(df)
+
+    df.drop(['description'], axis=1, inplace=True)
+
     featurewiz_df = featurewiz_get_predictors(df)
     heatmap_df = heatmap_get_predictors(df)
     lasso_df = lasso_get_predictors(df)
-    manual_df = manual_get_predictors(df)
 
+    word_featurewiz_df = featurewiz_get_predictors(word_df)
+    word_heatmap_df = heatmap_get_predictors(word_df)
+    word_lasso_df = lasso_get_predictors(word_df)
+
+    df_nltk_featurewiz = featurewiz_get_predictors(df_with_nltk)
+    df_nltk_heatmap = heatmap_get_predictors(df_with_nltk)
+
+    word_model = find_best_model(word_df, 'word_nltk')
+    word_featurewiz_model = find_best_model(word_featurewiz_df, 'word_featurewiz')
+    word_heatmap_model = find_best_model(word_heatmap_df, 'word_heatmap')
+    word_lasso_model = find_best_model(word_lasso_df, 'word_lasso')
+    nltk_featurewiz_model = find_best_model(df_nltk_featurewiz, 'nltk_featurewiz')
+    nltk_heatmap_model = find_best_model(df_nltk_heatmap, 'nltk_heatmap')
+    #nltk_lasso_model = find_best_model(df_nltk_lasso, 'nltk_lasso')
     featurewiz_model = find_best_model(featurewiz_df, 'feature')
     heatmap_model = find_best_model(heatmap_df, 'heatmap')
     lasso_model = find_best_model(lasso_df, 'lasso')
-    manual_model = find_best_model(manual_df, 'manual')
     original_model = find_best_model(df, 'original')
 
-    x = df
-    y = df['Rating']
+    x = df_with_nltk
+    y = df_with_nltk['Rating']
     x = x.drop(['Rating', 'Title'], axis=1)
 
-    models = [featurewiz_model, heatmap_model, lasso_model, manual_model, original_model]
-    dfs = [featurewiz_df, heatmap_df, lasso_df, manual_df, df]
+    models = [featurewiz_model, heatmap_model, lasso_model, original_model, word_model, word_featurewiz_model, word_heatmap_model, word_lasso_model, nltk_featurewiz_model, nltk_heatmap_model]
+    dfs =    [featurewiz_df,    heatmap_df,    lasso_df,    df,             word_df,    word_featurewiz_df,    word_heatmap_df,    word_lasso_df,    df_nltk_featurewiz,    df_nltk_heatmap]
     for model in dfs:
         model.drop(['Rating', 'Title'], axis=1, inplace=True)
 
@@ -489,5 +519,5 @@ if __name__ == '__main__':
             best_r2 = r2
 
     best_model_df.to_csv(os.path.join('csvs', 'model_df.csv'))
-    with open('final_model.pkl', 'wb') as f:
+    with open('final_model_2.pkl', 'wb') as f:
         pickle.dump(best_model, f)

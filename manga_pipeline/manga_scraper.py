@@ -9,6 +9,10 @@ from datetime import datetime
 import sqlite3
 from sqlite3 import Error
 import os
+import ast
+import urllib.parse
+import json
+
 
 def connect_db():
     try:
@@ -28,7 +32,6 @@ def reformat_url_name(title):
 def scrape_manganato_url(title):
     """Scrape Manganato URL for given title."""
     url = f'https://manganato.com/search/story/{reformat_url_name(title)}'
-    print(url)
     text = requests.get(url).content
     soup = BeautifulSoup(text, 'html.parser')
     links = soup.find_all(class_='item-img bookmark_check', href=True)
@@ -52,7 +55,6 @@ def manganato_url_scrape(manga_list=None):
     df_search['manganato_url'] = df_search['url_name'].apply(scrape_manganato_url)
 
     manual_input_manganato = df_search[df_search['manganato_url'].isnull()]
-    #manual_input_manganato.to_csv('manganato_manual_input.csv')
     with connect_db() as con:
         manual_input_manganato.to_sql("manganato_manual_input_needed", con, if_exists="replace")
 
@@ -69,7 +71,7 @@ def manganato_info_search(df_search):
             continue
         url = df_manganato.loc[index, 'manganato_url']
         text = requests.get(url).content
-        soup = BeautifulSoup( text , 'html.parser')
+        soup = BeautifulSoup(text , 'html.parser')
         try:
             manga_info = []
             author = []
@@ -126,10 +128,16 @@ def manganato_info_search(df_search):
             manga_info.append(last_chapter)
         except:
             pass
+        try:
+            info = soup.find('div', {'class': 'panel-story-info-description'})
+            description = info.text.strip()
+            manga_info.append(description)
+        except:
+            pass
 
         manga_info_df.append(manga_info)
 
-    manga_info_df = pd.DataFrame(manga_info_df, columns=['manganato_url', 'author', 'num_authors', 'genre', 'num_genres', 'status', 'views', 'votes', 'avg_rating', 'last_chapter'])
+    manga_info_df = pd.DataFrame(manga_info_df, columns=['manganato_url', 'author', 'num_authors', 'genre', 'num_genres', 'status', 'views', 'votes', 'avg_rating', 'last_chapter', 'description'])
     manganato_info = pd.merge(df_manganato, manga_info_df, on='manganato_url', how='inner')
     try:
         manganato_info = manganato_info.drop(['Unnamed: 0'], axis=1)
@@ -158,270 +166,209 @@ def manganato_info_search(df_search):
     df_author_and_genre = df_author_and_genre.groupby('manganato_url').agg(lambda x: x.max())
     manganato_info = pd.merge(manganato_info, df_author_and_genre, on='manganato_url', how='inner')
     try:
-        manganato_info = manganato_info.drop(['nan_x', 'nan_y', 'author', 'genre'], axis=1)
+        manganato_info = manganato_info.drop(['nan_x', 'nan_y', 'genre'], axis=1)
     except:
-        manganato_info = manganato_info.drop(['author', 'genre'], axis=1)
+        manganato_info = manganato_info.drop(['genre'], axis=1)
 
-    manganato_info = manganato_info.drop_duplicates()
+    manganato_info.drop_duplicates(subset=['Title'], inplace=True)
     manganato_info.to_csv(os.path.join('csvs', 'manganato_info.csv'))
 
     return manganato_info
 
+
+def is_wikipedia_page(url, author):
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        page_content = soup.get_text()
+        if '200' in str(response):
+            if isinstance(author, str):
+                author = ast.literal_eval(author)
+            for item in author:
+                for word in item.split():
+                    author_regex = r'(?i)\b{}\b'.format(re.escape(word))
+                    if re.search(author_regex, page_content) and ('serialized' in page_content or 'manga series' in page_content or 'manhwa' in page_content):
+                        return True
+        return False
+    except Exception as e:
+        print(f"found exception at {url}: {e}")
+        return False
+
+def find_disambiguation_url(url, author):
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        anchor_elements = soup.find_all("a")
+        for link_element in anchor_elements:
+            href = link_element.get("href")
+            if href and '(manga)' in href:
+                if is_wikipedia_page('https://en.wikipedia.org' + href, author):
+                    return 'https://en.wikipedia.org' + href
+        return 'None'
+    except Exception as e:
+        print(f"found exception at {url}: {e}")
+        return 'None'
+
+def final_wiki_url_search(title, author):
+    try:
+        url = 'https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch={}'.format(title + ' manga')
+        response = requests.get(url)
+        data = response.json()
+        if 'query' in data and 'search' in data['query']:
+            search_results = data['query']['search']
+            if search_results:
+                first_result = search_results[0]
+                page_title = first_result['title']
+                url = 'https://en.wikipedia.org/w/api.php?action=query&format=json&prop=info&pageids={}&inprop=url'.format(first_result['pageid'])
+                response = requests.get(url)
+                data = response.json()
+                if 'query' in data and 'pages' in data['query']:
+                    page_info = data['query']['pages']
+                    if page_info:
+                        page = page_info[list(page_info.keys())[0]]
+                        page_url = page['fullurl']
+                        if is_wikipedia_page(page_url, author):
+                            return page_url
+    except Exception as e:
+        print(f"found exception at {title}: {e}")
+        return 'None'
+    return 'None'
+
 def wiki_url_scrape(manganato_info):
-    ## scrape wikipedia for manga urls if exist
     try:
         manganato_info.drop(['Unnamed: 0'], axis=1, inplace=True)
     except:
         pass
-    manganato_info.drop_duplicates(inplace=True)
+    manganato_info.drop_duplicates(subset=['Title'], inplace=True)
     df_wiki = manganato_info
     df_wiki['wiki_url'] = 'None'
-    for index, row in df_wiki.iterrows():
-        page_url = 'None'
-        try:
-            page = wikipedia.page(df_wiki.loc[index, 'Title'])
-            page_url = page.url
-            if 'manga series' in str(page.content) or \
-                'manhwa' in str(page.content):
-                df_wiki.loc[index, 'wiki_url'] = page_url
-        except:
-            pass
-        if df_wiki.loc[index, 'wiki_url'] != 'None':
-            continue
-        try:
-            page = wikipedia.page(df_wiki.loc[index, 'url_name'])
-            page_url = page.url
-            if 'manga series' in str(page.content) or \
-                'manhwa' in str(page.content):
-                df_wiki.loc[index, 'wiki_url'] = page_url
-        except:
-            pass
-    for index, row in df_wiki.iterrows():
-        url_compare = df_wiki.loc[index, 'wiki_url'].replace('https://en.wikipedia.org/wiki/', '').replace('_', ' ').lower()
-        if df_wiki.loc[index, 'wiki_url'] == 'None' \
-            or ('list' in url_compare or '(film)' in url_compare):
-            try:
-                results = wikipedia.search(df_wiki.loc[index, 'Title'] + ' manga', results=3)
-                for i in range(0, len(results)):
-                    try:
-                        page = wikipedia.page(results[i])
-                        match = SequenceMatcher(a=results[i], b=df_wiki.loc[index, 'Title']).ratio()
-                        if match >= .5 or 'manga' in str(results[i]):
-                            try:
-                                url = page.url
-                                df_wiki.loc[index, 'wiki_url'] = url
-                                break
-                            except:
-                                pass
-                    except:
-                        pass
-            except:
-                continue
-        url_compare = df_wiki.loc[index, 'wiki_url'].replace('https://en.wikipedia.org/wiki/', '').replace('_', ' ').lower()
-        if df_wiki.loc[index, 'wiki_url'] == 'None' \
-            or ('list' in url_compare or '(film)' in url_compare) \
-                or (('(' + df_wiki.loc[index, 'Title'] + ')') in df_wiki.loc[index, 'wiki_url'] and 'manga' not in df_wiki.loc[index, 'wiki_url']):
-            df_wiki.loc[index, 'wiki_url'] = 'https://en.wikipedia.org/wiki/' + df_wiki.loc[index, 'Title'].strip().replace(' ', '_')
+
+    df_wiki['wiki_url'] = df_wiki.apply(lambda x: 'https://en.wikipedia.org/wiki/' + x['Title'].strip().split('(')[0].replace(' ', '_') + "_(disambiguation)", axis=1)
+    df_wiki['wiki_url'] = df_wiki.apply(lambda x: find_disambiguation_url(x['wiki_url'], x['author']), axis=1)
+    df_wiki['first_find_is_valid'] = False
+    df_wiki['first_find_is_valid'] = df_wiki.apply(lambda x: False if x['wiki_url'] == 'None' else True, axis=1)
+    df_wiki['wiki_url'] = df_wiki.apply(lambda x: final_wiki_url_search(x['Title'].split('(')[0], x['author']) if not x['first_find_is_valid'] else x['wiki_url'], axis=1)
+    df_wiki['second_find_is_valid'] = df_wiki.apply(lambda x: False if x['wiki_url'] == 'None' else True, axis=1)
+
+    df_wiki['has_wikipedia_page'] = df_wiki.apply(lambda x: True if x['first_find_is_valid'] or x['second_find_is_valid'] else False, axis=1)
+    columns_to_drop = ['first_find_is_valid', 'second_find_is_valid']
+    df_wiki['compare_title'] = df_wiki['Title']
+    df_wiki.drop(columns_to_drop, axis=1, inplace=True)
 
     manual_input_wiki = df_wiki[df_wiki['wiki_url'] == 'None']
-    #manual_input_wiki.to_csv('manual_input_wiki.csv')
-    with connect_db() as con:
-        manual_input_wiki.to_sql("wiki_manual_input_needed", con, if_exists="replace")
+    manual_input_wiki.to_csv(os.path.join('csvs', 'manual_input_wiki_urls.csv'))
+
+    actual_wiki = df_wiki[df_wiki['wiki_url'] != 'None']
+    actual_wiki.to_csv(os.path.join('csvs', 'valid_wiki_urls.csv'))
     df_wiki.to_csv(os.path.join('csvs', 'wiki_urls.csv'))
     return df_wiki
 
-def wiki_info_search(df_wiki):
-    ## scrape wikipedia urls
-    df_wikipedia = df_wiki
-    manga_info_df = []
-    for index, row in df_wikipedia.iterrows():
-        if df_wikipedia.loc[index, 'wiki_url'] == 'None':
-            continue
-        url = df_wikipedia.loc[index, 'wiki_url']
-        text = requests.get(url).content
-        soup = BeautifulSoup( text , 'html.parser')
-        try:
-            manga_info = ['', '', '', '', '', '', '', '']
-
-            manga_info[0] = url
-
-            switchGenre = False
-            switchOrigPublish = False
-            switchEngPublish = False
-            switchMagazine = False
-            switchDemo = False
-            switchOrigRun = False
-            switchVolumes = False
-
-            wiki_manga_info = []
-
-            try:
-                for info in  soup.findAll('tbody'):
-                    try:
-                        for tag in info.findAll('tr'):
-                            for label in tag:
-                                newLabel = label.text.strip().lower()
-                                if newLabel == 'genre':
-                                    switchGenre = True
-                                    continue
-                                elif ('by' in newLabel and 'pub' in newLabel) or ('lished' in newLabel):
-                                    switchOrigPublish = True
-                                    continue
-                                elif newLabel == 'english publisher':
-                                    switchEngPublish = True
-                                    continue
-                                elif newLabel == 'magazine':
-                                    switchMagazine = True
-                                    continue
-                                elif newLabel == 'demographic':
-                                    switchDemo = True
-                                    continue
-                                elif newLabel == 'original run':
-                                    switchOrigRun = True
-                                    continue
-                                elif newLabel == 'volumes':
-                                    switchVolumes = True
-                                    continue
-                                for test in label:
-                                    newTest = test.text.strip().lower()
-                                    if '.mw' in newTest:
-                                        continue
-                                    wiki_manga_info.append(newTest)
-                            if switchGenre and manga_info[1] == '':
-                                manga_info[1] = wiki_manga_info
-                            elif switchOrigPublish and manga_info[2] == '':
-                                manga_info[2] = wiki_manga_info
-                            elif switchEngPublish and manga_info[3] == '':
-                                manga_info[3] = wiki_manga_info
-                            elif switchMagazine and manga_info[4] == '':
-                                manga_info[4] = wiki_manga_info
-                            elif switchDemo and manga_info[5] == '':
-                                manga_info[5] = wiki_manga_info
-                            elif switchOrigRun and manga_info[6] == '':
-                                manga_info[6] = wiki_manga_info
-                            elif switchVolumes and manga_info[7] == '':
-                                manga_info[7] = wiki_manga_info
-
-                            switchGenre = False
-                            switchOrigPublish = False
-                            switchEngPublish = False
-                            switchMagazine = False
-                            switchDemo = False
-                            switchOrigRun = False
-                            switchVolumes = False
-                            wiki_manga_info = []
-                    except:
-                        pass
-            except:
-                continue
-        except:
-            pass
-        manga_info_df.append(manga_info)
 
 
-    manga_info_df = pd.DataFrame(manga_info_df, columns=['wiki_url', 'wiki_genres', 'wiki_original_publisher', 'wiki_english_publisher', 'wiki_magazine', 'wiki_demographic', 'wiki_original_run', 'wiki_volumes'])
-    #manga_info_df.to_csv('test_wiki.csv')
-    for index, row in manga_info_df.iterrows():
-        try:
-            manga_info_df.loc[index, 'wiki_genres'].remove('[1]')
-        except:
-            pass
-        try:
-            manga_info_df.loc[index, 'wiki_genres'].remove('[2]')
-        except:
-            pass
-        try:
-            manga_info_df.loc[index, 'wiki_genres'].remove('[3]')
-        except:
-            pass
-        try:
-            manga_info_df.loc[index, 'wiki_genres'].remove('[4]')
-        except:
-            pass
-        try:
-            manga_info_df.loc[index, 'wiki_genres'].remove('')
-        except:
-            pass
-        try:
-            manga_info_df.loc[index, 'wiki_genres'].remove(',')
-        except:
-            pass
-        for i in range(0, len(manga_info_df.loc[index, 'wiki_genres'])):
-            try:
-                manga_info_df.loc[index, 'wiki_genres'][i] = 'wiki_' + manga_info_df.loc[index, 'wiki_genres'][i]
-            except:
-                pass
-            try:
-                manga_info_df.loc[index, 'wiki_genres'][i] = manga_info_df.loc[index, 'wiki_genres'][i].replace('[1]', ';')
-            except:
-                pass
-            try:
-                manga_info_df.loc[index, 'wiki_genres'][i] = manga_info_df.loc[index, 'wiki_genres'][i].replace('[2]', ';')
-            except:
-                pass
-            try:
-                manga_info_df.loc[index, 'wiki_genres'][i] = manga_info_df.loc[index, 'wiki_genres'][i].replace('[3]', ';')
-            except:
-                pass
-            try:
-                manga_info_df.loc[index, 'wiki_genres'][i] = manga_info_df.loc[index, 'wiki_genres'][i].replace('[4]', ';')
-            except:
-                pass
-            try:
-                manga_info_df.loc[index, 'wiki_genres'][i] = manga_info_df.loc[index, 'wiki_genres'][i].replace('[5]', ';')
-            except:
-                pass
-        if len(manga_info_df.loc[index, 'wiki_genres']) == 1:
-            try:
-                manga_info_df.loc[index, 'wiki_genres'] = manga_info_df.loc[index, 'wiki_genres'][0]
-                manga_info_df.loc[index, 'wiki_genres'] = manga_info_df.loc[index, 'wiki_genres'].strip().split(';')
-                try:
-                    manga_info_df.loc[index, 'wiki_genres'] = manga_info_df.loc[index, 'wiki_genres'][0].strip().split(',')
-                except:
-                    pass
-            except:
-                pass
-        try:
-            manga_info_df.loc[index, 'wiki_genres'].remove('')
-        except:
-            pass
-        try:
-            manga_info_df.loc[index, 'wiki_genres'].remove(',')
-        except:
-            pass
+def get_page_content(page_url):
+    base_url = "https://en.wikipedia.org/w/api.php"
+    page_title = page_url.split("/")[-1]
+    page_title = urllib.parse.unquote(page_title)
+    params = {
+        "action": "parse",
+        "format": "json",
+        "page": page_title,
+        "prop": "text|displaytitle|iwlinks|categories|templates|images|sections|properties|revid|parsewarnings",
+        "disablelimitreport": True,
+        "disableeditsection": True,
+        "disablestylededuplication": True,
+        "disabletoc": True,
+        "disableeditsection": True,
+        "disableeditlinks": True,
+        "disabletoclinks": True,
+        "inprop": "url"
+    }
 
-
-
-    manga_info_df.to_csv(os.path.join('csvs', 'wiki_info.csv'))
-
-
-    wiki_urls = df_wiki[df_wiki['wiki_url'] != None]
-    wiki_info_df = manga_info_df
-
-    wiki_urls = pd.merge(wiki_urls, wiki_info_df, on='wiki_url', how='inner')
-
-    df_wiki_genre = wiki_urls[['wiki_genres', 'wiki_url']]
-
-    df_wiki_genre = df_wiki_genre.explode('wiki_genres')
-    df_wiki_genre = df_wiki_genre.drop_duplicates()
-
-    df_wiki_genre = df_wiki_genre.pivot(index="wiki_url", columns='wiki_genres', values='wiki_genres')
-    df_wiki_genre = df_wiki_genre.reset_index()
-    df_wiki_genre = df_wiki_genre.groupby('wiki_url').agg(lambda x: x.max())
-
+    response = requests.get(base_url, params=params)
+    data = response.json()
     try:
-        df_wiki_genre.drop([''], axis=1)
+        html_content = data["parse"]["text"]["*"]
+        soup = BeautifulSoup(html_content, "html.parser")
+
+        infobox = soup.find("table", class_="infobox")
+        if infobox:
+            return str(infobox)
+        return ""
     except:
-        pass
+        return data
 
-    wiki_urls = pd.merge(wiki_urls, df_wiki_genre, on='wiki_url', how='inner')
 
-    wiki_urls = wiki_urls.drop(['wiki_genres'], axis=1)
+def parse_page_content(page_content):
+    manga_info = ['', '', '', '', '', '', '', '']
 
-    df = wiki_urls
+    soup = BeautifulSoup(page_content, 'html.parser')
 
-    df.to_csv(os.path.join('csvs', "combined_non_transformed_data.csv"))
+    # Parse genre
+    genre_element = soup.find('th', text='Genre')
+    if genre_element:
+        genre_info = genre_element.find_next('td').text.strip()
+        manga_info[1] = genre_info
 
+    # Parse publisher
+    publisher_element = soup.find('th', text='Published\xa0by')
+    if publisher_element:
+        publisher_info = publisher_element.find_next('td').text.strip()
+        manga_info[2] = publisher_info
+
+    # Parse demographic
+    demographic_element = soup.find('th', text='Demographic')
+    if demographic_element:
+        demographic_info = demographic_element.find_next('td').text.strip()
+        manga_info[5] = demographic_info
+
+    # Parse magazine
+    magazine_element = soup.find('th', text='Magazine')
+    if magazine_element:
+        magazine_info = magazine_element.find_next('td').text.strip()
+        manga_info[4] = magazine_info
+
+    # Parse volumes
+    volumes_element = soup.find('th', text='Volumes')
+    if volumes_element:
+        volumes_info = volumes_element.find_next('td').text.strip()
+        manga_info[7] = volumes_info
+
+    # Parse original run
+    original_run_element = soup.find('th', text='Original run')
+    if original_run_element:
+        original_run_info = original_run_element.find_next('td').text.strip()
+        manga_info[6] = original_run_info
+
+    # Parse English publisher
+    english_publisher_element = soup.find('th', text='English publisher')
+    if english_publisher_element:
+        english_publisher_info = english_publisher_element.find_next('td').text.strip()
+        manga_info[3] = english_publisher_info
+
+    return manga_info
+
+
+def clean_genre_data(genres):
+    if not isinstance(genres, str):
+        return np.nan
+    genres = re.sub(r'\[\d+\]', ',', genres)  # Replace [1], [2], etc. with a comma
+    genres = re.sub(r'(?<=[a-z])(?=[A-Z])', ',', genres)  # Add a comma before lowercase next to uppercase
+    cleaned_genres = [genre.strip() for genre in genres.split(',') if genre.strip()]
+    cleaned_genres = ["wiki_" + genre.lower() for genre in cleaned_genres]
+    return cleaned_genres
+
+def clean_publisher_data(publisher, column):
+    if not isinstance(publisher, str):
+        return np.nan
+
+    publisher = re.sub(r'\([^)]+\)', ',', publisher)  # Replace string subsets within parentheses with a comma
+    publisher = re.sub(r'(?<=[a-z])(?=[A-Z])(?<!manga)(?<!ONE)', ',', publisher)
+    cleaned_publishers = [pub.strip() for pub in publisher.split(',') if pub.strip()]
+    cleaned_publishers = ["wiki_" + pub.lower() + column for pub in cleaned_publishers]
+    return cleaned_publishers
+
+
+def clean_manganato_data(df):
     for index, row in df.iterrows():
         ## fix views, votes, and avg_rating
         if isinstance(df.loc[index, 'views'], str) and 'M' in df.loc[index, 'views']:
@@ -470,79 +417,131 @@ def wiki_info_search(df_wiki):
                         df.loc[index, 'last_chapter'] = df.loc[index, 'last_chapter'][num_index:]
 
             if not any(char.isdigit() for char in df.loc[index, 'last_chapter']):
-                df.loc[index, 'last_chapter'] = np.nan
+                df.loc[index, 'last_chapter'] = 1
             try:
                 df.loc[index, 'last_chapter'] = float(df.loc[index, 'last_chapter'])
+                if df.loc[index, 'last_chapter'] == 0:
+                    df.loc[index, 'last_chapter'] = 1
             except:
-                df.loc[index, 'last_chapter'] = np.nan
+                df.loc[index, 'last_chapter'] = 1
+    return df
 
-        ## fix wiki_demographic
+
+def wiki_info_search(df_wiki):
+    df_wikipedia = df_wiki.copy()
+    manga_info_df = []
+
+    for index, row in df_wikipedia.iterrows():
+        if df_wikipedia.loc[index, 'wiki_url'] == 'None':
+            continue
+
+        url = df_wikipedia.loc[index, 'wiki_url']
+
         try:
-            df.loc[index, 'wiki_demographic'] = df.loc[index, 'wiki_demographic'][0]
-            df.loc[index, 'wiki_demographic'] = df.loc[index, 'wiki_demographic'].strip('\'')
+            page_content = get_page_content(url)
+            manga_info = parse_page_content(page_content)
+            manga_info[0] = df_wikipedia.loc[index, 'wiki_url']
 
+            manga_info_df.append(manga_info)
+
+        except Exception as e:
+            print(f"Error retrieving data for title: {df_wikipedia.loc[index, 'Title']}: {str(e)}")
+            continue
+
+    manga_info_df = pd.DataFrame(manga_info_df, columns=['wiki_url', 'wiki_genres', 'wiki_original_publisher', 'wiki_english_publisher', 'wiki_magazine', 'wiki_demographic', 'wiki_original_run', 'wiki_volumes'])
+    manga_info_df['wiki_genres'] = manga_info_df['wiki_genres'].apply(clean_genre_data)
+    manga_info_df.to_csv(os.path.join('csvs', 'wiki_info.csv'))
+
+    wiki_urls = df_wiki[df_wiki['wiki_url'].notnull()]
+    wiki_info_df = manga_info_df
+    wiki_urls = pd.merge(wiki_urls, wiki_info_df, on='wiki_url', how='left')
+
+    df_wiki_genre = wiki_urls[['wiki_genres', 'wiki_url']]
+    df_wiki_genre = df_wiki_genre.explode('wiki_genres').drop_duplicates()
+    df_wiki_genre = df_wiki_genre.pivot(index="wiki_url", columns='wiki_genres', values='wiki_genres').reset_index()
+    df_wiki_genre = df_wiki_genre.groupby('wiki_url').agg(lambda x: x.max())
+    df_wiki_genre.drop([''], axis=1, inplace=True, errors='ignore')
+    wiki_urls = pd.merge(wiki_urls, df_wiki_genre, on='wiki_url', how='inner')
+    wiki_urls = wiki_urls.drop(['wiki_genres'], axis=1)
+
+    df = wiki_urls
+    df.to_csv(os.path.join('csvs', "combined_non_transformed_data.csv"))
+    df = clean_manganato_data(df)
+
+    df['wiki_start_date'] = np.nan
+    df['wiki_end_date'] = np.nan
+
+    for index, row in df.iterrows():
+        try:
+            df.loc[index, 'wiki_demographic'] = df.loc[index, 'wiki_demographic'].split(',')[0]
         except:
-            df.loc[index, 'wiki_demographic'] = np.nan
+            pass
 
-        ## fix wiki_original_run
         try:
-            df.loc[index, 'wiki_original_run'] = df.loc[index, 'wiki_original_run'][0]
-            df.loc[index, 'wiki_original_run'] = df.loc[index, 'wiki_original_run'].lower()
-            df.loc[index, 'wiki_original_run'] = df.loc[index, 'wiki_original_run'].strip('\'')
-            try:
-                if ' ' in df.loc[index, 'wiki_original_run']:
-                    try:
-                        df.loc[index, 'wiki_original_run'] = datetime.strptime(df.loc[index, 'wiki_original_run'], '%B %d, %Y')
-                    except:
-                        pass
-                    try:
-                        df.loc[index, 'wiki_original_run'] = datetime.strptime(df.loc[index, 'wiki_original_run'], '%B %Y')
-                    except:
-                        pass
-                    try:
-                        df.loc[index, 'wiki_original_run'] = datetime.strptime(df.loc[index, 'wiki_original_run'], '%d %B %Y')
-                    except:
-                        pass
-                else:
-                    df.loc[index, 'wiki_original_run'] = datetime.strptime(df.loc[index, 'wiki_original_run'], '%Y')
+            run_dates = df.loc[index, 'wiki_original_run'].split('–')
+            df.loc[index, 'wiki_start_date'] = run_dates[0].strip()
+            df.loc[index, 'wiki_end_date'] = run_dates[1].strip()
+
+            date_formats = ['%B %d, %Y', '%B %Y', '%d %B %Y', '%Y']
+            for fmt in date_formats:
+                try:
+                    df.loc[index, 'wiki_start_date'] = datetime.strptime(df.loc[index, 'wiki_start_date'], fmt)
+                    break
+                except:
                     pass
-            except:
-                pass
+            for fmt in date_formats:
+                try:
+                    df.loc[index, 'wiki_end_date'] = datetime.strptime(df.loc[index, 'wiki_end_date'], fmt)
+                    break
+                except:
+                    pass
         except:
-            df.loc[index, 'wiki_original_run'] = np.nan
+            pass
 
-        ## fix wiki_volumes
         try:
-            df.loc[index, 'wiki_volumes'] = df.loc[index, 'wiki_volumes'][0]
-            df.loc[index, 'wiki_volumes'] = list(df.loc[index, 'wiki_volumes'].split(' '))[0]
-            df.loc[index, 'wiki_volumes'] = int(df.loc[index, 'wiki_volumes'])
+            df.loc[index, 'wiki_volumes'] = int(df.loc[index, 'wiki_volumes'].split(' ')[0])
         except:
             df.loc[index, 'wiki_volumes'] = np.nan
 
-        ## fix publisher, magazine, and english publisher
-        try:
-            df.loc[index, 'wiki_original_publisher'] = df.loc[index, 'wiki_original_publisher'][0]
-        except:
-            df.loc[index, 'wiki_original_publisher'] = np.nan
-        try:
-            df.loc[index, 'wiki_english_publisher'] = df.loc[index, 'wiki_english_publisher'][0]
-        except:
-            df.loc[index, 'wiki_english_publisher'] = np.nan
-        try:
-            df.loc[index, 'wiki_magazine'] = df.loc[index, 'wiki_magazine'][0]
-        except:
-            df.loc[index, 'wiki_magazine'] = np.nan
+    df['wiki_original_publisher'] = df['wiki_original_publisher'].apply(lambda publisher: clean_publisher_data(publisher, '_original_publisher'))
+    df['wiki_english_publisher'] = df['wiki_english_publisher'].apply(lambda publisher: clean_publisher_data(publisher, '_english_publisher'))
+    df['wiki_magazine'] = df['wiki_magazine'].apply(lambda publisher: clean_publisher_data(publisher, '_magazine'))
+
+    df_wiki_publisher = df[['wiki_original_publisher', 'wiki_url']].reset_index(drop=True)
+    df_wiki_publisher = df_wiki_publisher.explode('wiki_original_publisher')
+    df_wiki_publisher.drop_duplicates(subset=['wiki_url'], inplace=True)
+    df_wiki_publisher = df_wiki_publisher.pivot(index="wiki_url", columns='wiki_original_publisher', values='wiki_original_publisher')
+    df_wiki_publisher.rename_axis(columns='wiki_original_publisher', inplace=True)
+    df_wiki_publisher = df_wiki_publisher.groupby(level=0, axis=1).max().reset_index()
+
+    df_wiki_english_publisher = df[['wiki_english_publisher', 'wiki_url']].reset_index(drop=True)
+    df_wiki_english_publisher = df_wiki_english_publisher.explode('wiki_english_publisher')
+    df_wiki_english_publisher.drop_duplicates(subset=['wiki_url'], inplace=True)
+    df_wiki_english_publisher = df_wiki_english_publisher.pivot(index="wiki_url", columns='wiki_english_publisher', values='wiki_english_publisher')
+    df_wiki_english_publisher.rename_axis(columns='wiki_english_publisher', inplace=True)
+    df_wiki_english_publisher = df_wiki_english_publisher.groupby(level=0, axis=1).max().reset_index()
+
+    df_wiki_magazine = df[['wiki_magazine', 'wiki_url']].reset_index(drop=True)
+    df_wiki_magazine = df_wiki_magazine.explode('wiki_magazine')
+    df_wiki_magazine.drop_duplicates(subset=['wiki_url'], inplace=True)
+    df_wiki_magazine = df_wiki_magazine.pivot(index="wiki_url", columns='wiki_magazine', values='wiki_magazine')
+    df_wiki_magazine.rename_axis(columns='wiki_magazine', inplace=True)
+    df_wiki_magazine = df_wiki_magazine.groupby(level=0, axis=1).max().reset_index()
+
+    df_wiki_publisher_1 = pd.merge(df_wiki_english_publisher, df_wiki_magazine, on='wiki_url', how='inner')
+    df = df.drop(['wiki_original_publisher', 'wiki_english_publisher', 'wiki_magazine', 'wiki_original_run', 'author'], axis=1)
+    df = pd.merge(df, df_wiki_publisher, on='wiki_url', how='inner')
+    df = pd.merge(df, df_wiki_publisher_1, on='wiki_url', how='inner')
 
     columns_to_remove = ['Unnamed: 0', 'Unnamed: 189', 'wiki_', 'wiki_,']
-    for column in df.columns:
-        if column == '' or column == np.nan or column in columns_to_remove:
-            df = df.drop([column], axis=1)
+    df = df.drop(columns=[col for col in df.columns if col in columns_to_remove or col == '' or col is np.nan])
+    df.drop_duplicates(subset=['Title'], inplace=True)
 
-    df = df.drop_duplicates()
     df.to_csv(os.path.join('csvs', "scraped_data.csv"))
     with connect_db() as con:
         df.to_sql("scraped_data", con, if_exists="replace")
     return df
+
 
 def scrape_manga(manga_list=None):
     if not os.path.exists('csvs'):
@@ -560,9 +559,10 @@ def scrape_manga(manga_list=None):
 
 
 
-#df = pd.read_csv('read_manga.csv')
-#df = manganato_url_scrape(df)
-#df = pd.read_csv('test_3.csv')
-#df = wiki_info_search(df)
+"""df = pd.read_csv(os.path.join('csvs', 'wiki_urls.csv'))
+df = wiki_info_search(df)
+df.to_csv('test_wiki_info_final.csv')"""
+
+
 
 

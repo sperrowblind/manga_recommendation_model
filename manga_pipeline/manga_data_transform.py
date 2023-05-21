@@ -3,7 +3,13 @@ import numpy as np
 from datetime import datetime
 import sqlite3
 from sqlite3 import Error
+from sklearn.feature_extraction.text import CountVectorizer
 import os
+
+import re
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
 
 from .manga_scraper import clean_title
 
@@ -17,6 +23,8 @@ def connect_db():
     return con
 
 def manga_release_date_clean(x):
+    if isinstance(x, str) and x.lower() == 'present':
+        return -1
     try:
         x = x.strip(' 00:00:00')
         x = datetime.strptime(x, '%Y-%M-%d')
@@ -25,6 +33,17 @@ def manga_release_date_clean(x):
     except:
         x = 0
         return x
+
+def clean_text_nltk(description):
+    ps = PorterStemmer()
+    stop_words = set(stopwords.words('english'))
+    description = description.replace('Description :', '')
+    description = re.sub('[^a-zA-Z]', ' ', description)
+    description = description.lower()
+    description = description.split()
+    description = [ps.stem(word) for word in description if not word in stop_words] # use stop_words instead of stopwords
+    description = ' '.join(description)
+    return description
 
 def transform_data(df_transform = None):
     with connect_db() as con:
@@ -49,16 +68,18 @@ def transform_data(df_transform = None):
         final_df = df_transform
         final_df['Count of Title Characters'] = final_df['Title'].apply(lambda x: len(str(x)))
 
-    # turn wiki_original_run to an ordinal number
-    date_col = 'wiki_original_run'
-    final_df[date_col] = final_df[date_col].apply(lambda x: manga_release_date_clean(x))
+    # turn wiki_start and end to an ordinal number
+    start_date_col = 'wiki_start_date'
+    final_df[start_date_col] = final_df[start_date_col].apply(lambda x: manga_release_date_clean(x))
+    end_date_col = 'wiki_end_date'
+    final_df[end_date_col] = final_df[end_date_col].apply(lambda x: manga_release_date_clean(x))
 
     # remove unneeded columns and attempt to drop duplicates
     to_drop = ['index', 'url_name', 'manganato_url', 'wiki_url']
     for column in to_drop:
         if column in final_df.columns:
             final_df.drop(column, axis=1, inplace=True)
-    final_df.drop_duplicates(inplace=True)
+    final_df.drop_duplicates(subset=['Title'], inplace=True)
 
     final_df.rename(columns={'Count of Title Characters': 'title_char_count'}, inplace=True)
 
@@ -67,15 +88,15 @@ def transform_data(df_transform = None):
 
     #get dummies for any categorical variables
 
-    need_dummies = ['wiki_original_publisher', 'wiki_english_publisher', 'wiki_magazine', 'wiki_demographic', 'status']
+    need_dummies = ['wiki_demographic', 'status']
     for column in final_df.columns:
         if len(final_df.index) > 0:
             if isinstance(final_df.loc[0, column], str) and column != 'Title' \
-                and column not in need_dummies and column != 'wiki_original_run':
+                and column not in need_dummies and column != 'wiki_original_run' and column != 'description':
                 final_df[column] = final_df[column].apply(lambda x: 1 if x != 'NONE' else 0)
     final_df = pd.get_dummies(final_df, columns=need_dummies,drop_first=True)
 
-    columns_to_delete = ['wiki_original_publisher_NONE', 'nan']
+    columns_to_delete = ['wiki_original_publisher_NONE', 'nan' , 'nan_x', 'compare_title', 'nan_y']
     for column in final_df.columns:
         if column in columns_to_delete:
             final_df.drop([column], axis=1, inplace=True)
@@ -100,3 +121,34 @@ def columns_for_model(df):
     df = df.reindex(columns=needed_columns, fill_value=0)
     return df[needed_columns]
 
+def get_word_count_df(df):
+
+    # clean description
+    description_col = 'description'
+    df[description_col] = df[description_col].apply(clean_text_nltk)
+    cv = CountVectorizer()
+    words = cv.fit_transform(df[description_col])
+    word_counts = words.toarray()
+    column_names = cv.get_feature_names_out()
+    df['word_count_sum'] = words.sum(axis=1)
+
+    word_counts_df = pd.DataFrame(words.toarray(), columns=column_names)
+    word_counts_df.to_csv(os.path.join('csvs', 'word_counts_df.csv'))
+
+    df = pd.concat([df, word_counts_df], axis=1)
+    df.drop([description_col], axis=1, inplace=True)
+
+    return df
+
+##
+import ssl
+
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+
+nltk.download('stopwords')
+#transform_data()
