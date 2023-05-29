@@ -23,3 +23,4 @@ read_manga.csv
 final_data.csv
 model_df.csv
 manga_recommendation_database.sqlite
+manganato_url_cache.txt

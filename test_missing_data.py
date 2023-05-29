@@ -1,5 +1,5 @@
 import pandas as pd
-from manga_data_transform import connect_db
+from manga_pipeline.manga_data_transform import connect_db
 
 
 with connect_db() as con:
