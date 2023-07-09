@@ -51,5 +51,9 @@ If you are training your own model and notice that not every title is in the scr
 
 ## Future Work
 I am going to revamp the model info page with more graphs and better information.
+
 There are a few bugs I've noticed with certain special characters in titles that have been causing errors.
+
 Clean up the database, it's a little random and contains some duplicates, the bugs which caused them should not be an issue any more but they're still there.
+
+Cleaning up manga_model.py is a priority right now, I really don't like how it looks.
