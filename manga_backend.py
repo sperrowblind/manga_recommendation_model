@@ -96,6 +96,7 @@ def search():
     try:
         with connect_db() as con:
             cursor = con.cursor()
+            cursor.execute("CREATE TABLE IF NOT EXISTS predicted_data (Title TEXT, Predicted_Rating INT, URL TEXT, Description TEXT, Model_Version TEXT, PRIMARY KEY (Title, Model_Version))")
             cursor.execute(query)
             result = cursor.fetchall()
             df = pd.DataFrame(result, columns=['Title', 'Rating', 'Source', 'Model_Version'])
