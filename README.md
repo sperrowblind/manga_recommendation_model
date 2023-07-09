@@ -14,6 +14,8 @@ Python is required for this project so be sure to install it if not done already
 Create a virtual environment with 
 `python3 -m venv venv`
 
+(I recommend using python3.9)
+
 Enter the virtual environment with 
 `source venv/bin/activate`
 
@@ -25,6 +27,8 @@ Run
 
 ## Running the Application
 From this point, you can start the application with `flask run` (You may need to run `python manga_recommendation_clean_data.py` first, I tried to fix this so you don't need to)
+
+Do not be alarmed if start up on the application takes a minute, the application will install the nltk stopwords package on initial startup and this can take a few seconds. This does not happen on consecutive start ups.
 
 You will be brought to a screen with three buttons: Predict Rating, Find New Manga, and Search for Manga
 
