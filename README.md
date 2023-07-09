@@ -24,7 +24,7 @@ Run
 `source .env.sample`
 
 ## Running the Application
-From this point, you can start the application with `flask run`
+From this point, you can start the application with `flask run` (You may need to run `python manga_recommendation_clean_data.py` first, I tried to fix this so you don't need to)
 
 You will be brought to a screen with three buttons: Predict Rating, Find New Manga, and Search for Manga
 
@@ -48,3 +48,4 @@ If you are training your own model and notice that not every title is in the scr
 ## Future Work
 I am going to revamp the model info page with more graphs and better information.
 There are a few bugs I've noticed with certain special characters in titles that have been causing errors.
+Clean up the database, it's a little random and contains some duplicates, the bugs which caused them should not be an issue any more but they're still there.
