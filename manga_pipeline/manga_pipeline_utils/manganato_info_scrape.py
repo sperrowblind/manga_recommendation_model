@@ -51,6 +51,8 @@ async def get_manga_info(session, url):
                 manga_info.append(num_ratings.text.strip())
                 manga_info.append(avg_rating.text.strip())
             except:
+                manga_info.append(0)
+                manga_info.append(0)
                 pass
         except:
             pass
@@ -66,6 +68,5 @@ async def get_manga_info(session, url):
             manga_info.append(description)
         except:
             pass
-
         return manga_info
 

@@ -1,31 +1,68 @@
-,Title,num_authors,num_genres,views,votes,avg_rating,last_chapter,description,Fukuda Ikumi,Hansiryeong,Iruka Notsuno,Kase Daiki,Makise Shoun,Mizuno Saikoro,Nina (Ii),Ozawa Toshio,Sano Sakura,Setsuna,Shinkyu Chie,Studio73,Tanaka Yoshiki,Tanimura Nijuu-En,Tao Noritake,Action,Comedy,Doujinshi,Drama,Fantasy,Harem,Historical,Isekai,Josei,Mature,One shot,Psychological,Romance,School life,Sci fi,Seinen,Shoujo,Shounen,Slice of life,Smut,Supernatural,has_wikipedia_page,wiki_volumes,wiki_adventure,wiki_fantasy,wiki_science fantasy,wiki_superhero,wiki_start_date,wiki_end_date,wiki_kodansha_original_publisher,wiki_shueisha_original_publisher,wiki_na kodansha usa_english_publisher,wiki_na viz media_english_publisher,wiki_weekly shōnen jump_magazine,wiki_weekly shōnen magazine_magazine,title_char_count,wiki_demographic_Shōnen,status_ongoing
-0,The Overly Straightforward Natsume-Kun Can't Properly Confess,1,5,27000,22,4.0,6.0,"Description :
-Is this confession for real!? A cute surreal love comedy between a slightly off-the-rails full-steam-ahead high school boy and a fluffy cool-headed gyaru!",0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,1,0,0,False,0,0,0,0,0,0,0,0,0,0,0,0,0,61,0,1
-1,Real No Heroine Wa Irimasen!,1,6,30000000,1927,4.28,93.0,"Description :
-Aramiya Seiichi is an ordinary high school… eroge otaku who’s given up all hope on girls in the 3D world due to a certain incident. One day, after he’s bought a bunch of new material in consequence of experiencing the frustration of a perfect eroge character turning out to be “used goods,” he encounters a delinquent-like-looking girl being about to get raped by a bunch of guys. By mere chance, he rescues her. Days later, when school starts again, it turns out to have been his classmate, Ayame, a feared delinquent girl who’s got all kind of rumors about her – especially that she’s “used goods.” And it appears that she’s set on becoming his ideal girl to make him fall for her.",0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,False,0,0,0,0,0,0,0,0,0,0,0,0,0,28,0,1
-2,Medusa And Futakuchi-Chan,1,3,918000,311,4.24,81.0,"Description :
-Medusa and Futakuchi-chan summary is updating. Come visit MangaNato.com sometime to read the latest chapter of Medusa and Futakuchi-chan. If you have any question about this manga, Please don't hesitate to contact us or translate team. Hope you enjoy it.",0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,False,0,0,0,0,0,0,0,0,0,0,0,0,0,25,0,1
-3,Nanba Mg5,1,5,4600000,428,4.75,124.0,"Description :
-Born in a family of delinquents,Nanba Tsuyoshi is expected to succeed his older brother as the strongest delinquent in school. Unbeknownst to his family however, he decides to enroll in the top high school in town to live as a normal high schooler. Can he maintain his double life as the strongest delinquent in town and as a normal high schooler?",0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,False,0,0,0,0,0,0,0,0,0,0,0,0,0,9,0,1
-4,Takako-San,1,2,235400,101,4.69,62.0,"Description :
-The signal is hiding in the breathing. Takako is the girl who can hear things more clearly than other people. It’s not a special power, so she can’t write it on her resume, but Takako communes and communicates with the world through sound. Let’s watch the simple daily life of Takako while she warmly embraces the heartless modern society.",0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,0,0,0,0,0,10,0,1
-5,Ts Shita Yuujin Ga Guigui Kuru Kudan,1,1,325900,143,3.59,28.0,"Description :
-TS Shita Yuujin ga Guigui Kuru Kudan summary is updating. Come visit MangaNato.com sometime to read the latest chapter of TS Shita Yuujin ga Guigui Kuru Kudan. If you have any question about this manga, Please don't hesitate to contact us or translate team. Hope you enjoy it.",0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,0,0,0,0,0,0,0,0,0,0,0,0,0,36,0,1
-6,Reborn As A Character That Never Existed,2,3,951100,161,4.83,24.0,"Description :
-""After meeting her death, Thalia is reborn as the female protagonist’s older sister, a character that never existed in the novel she wrote in her past life.
+,Title,num_authors,num_genres,views,votes,avg_rating,last_chapter,description,Kishimoto Masashi,Oda Eiichiro,Action,Adventure,Comedy,Doujinshi,Drama,Fantasy,Martial arts,Shounen,has_wikipedia_page,wiki_volumes,wiki_adventure,wiki_fantasy,wiki_fantasy comedy,wiki_martial arts,wiki_start_date,wiki_end_date,wiki_shueisha_original_publisher,wiki_aus madman entertainment_english_publisher,wiki_aus  madman entertainment_english_publisher,wiki_na/uk viz media_english_publisher,wiki_weekly shōnen jump_magazine,title_char_count,status_ongoing
+0,naruto,1,8,60200000,1411,4.5,700.5,"Description :
+Read Naruto Manga Online  
+Naruto is a manga series from Japan. It's about the story of a young ninja who wants to become the strongest leader in his village. The series were produced by Masashi Kishimoto and in 1997 were published. Later this manga was adapted into a TV anime. This studio also has developed 10 movies as well as a number of video animations. You can read Naruto manga online, which until today has sold over 220 copies around the world (except from Japan in 35 more countries), making it the 3rd best selling series of manga in history. 
 
-She tries hard to get attached to the world inside the novel, but she gets caught up in the thought that everything is just a mere creation of her own.
+Main character in Naruto Manga
 
-“Please make Tilly love me.”
+The Story
 
-Aegis, who was supposed to fall in love with Thalia's younger sister, makes a wish to God on his coming-of-age birthday.
+When he was a child, Naruto was isolated from its community. The people in the village treated him as he was Nine-Tails itself and don't want him. None in the village had the right to mention the Nine-Tails, in order to prevent Naruto from finding the truth. But 12 years later, he finds out the truth from ninja Mizuki, who told him. Some time later, Naruto becomes a ninja and usually competes against other teams, and they form a three-person team by the name Team 7. Like all the other similar teams in every village, the Team 7 has to complete missions that are requested by the villagers, ranging from being bodyguards or doing chores. After participating in a number of missions, the Team 7 is allowed to take place in an exam, in order to move up in hierarchy and be able to be involved in more difficult missions. After 2,5 years, Naruto returns from training and he continued with his team to fight the Akatsuki members.
 
-Will Thalia be able to love Aegis?""",0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,False,0,0,0,0,0,0,0,0,0,0,0,0,0,40,0,1
-7,The Heat Of The Reincarnated Villainess,4,8,2600000,157,4.35,37.0,"Description :
-A detested villainess and a proper prince are instinctually drawn to each other's bodies before they have a chance to develop feelings. What will their destiny be!?
+Production
 
-I was reincarnated into the world of the otome game ""Prince of Prince"" as Rose, the hated villainess. Originally, the heroine and the prince were supposed to be attracted to each other, and due to the influence of a special pheromone, they were supposed to go into heat, but for some reason, now the pheromone works on the villainess and the prince...?! ""It's different from the game I know...!""",0,0,1,0,0,1,0,0,0,0,0,1,0,1,0,0,0,0,1,1,0,1,1,1,1,0,0,1,0,0,0,0,0,0,1,0,False,0,0,0,0,0,0,0,0,0,0,0,0,0,39,0,1
-8,The Chronicle Of Seven Cities,2,5,226200,56,4.63,9.0,"Description :
-The story is set in a near-future Earth, in the aftermath of a major disaster that shifts the planet's polar axis 90 degrees, situating the poles along the equatorial line and killing everyone on Earth. A moon-based colony avoids the disaster, and begins recolonizing the depopulated Earth by establishing seven cities in strategic locations. However, to ensure the loyalty of the Earth colony, the moon establishes an orbital defense system that destroys anything that flies 500 meters in the air. When an unknown virus kills everyone on the moon, humanity becomes trapped on Earth, where the political intrigues of the seven cities continue to play out.",1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,True,41,1,1,0,0,0,0,1,0,1,0,0,1,29,1,1
-9,Hero Killer,1,6,8700000,1007,3.16,109.0,"Description :
-The story of a young man's revenge on the heroes that failed him.",0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,1,0,0,0,1,0,0,1,0,0,0,True,37,1,0,1,1,0,-1,0,1,0,1,1,0,11,1,0
+When Kishimoto first made the plot of the story, thought that it was a mess. For example, he thought that the chakras, along with other hand signs made Naruto look like a lot of Japanese them, but he believed that it could be enjoyable for reading. In these particular series, he actually tried to make his characters to look like unique ones. Above all he based his main theme on the Japanese culture and he separated the characters in the series into different teams, in order to give to each team a special flavor. He wanted to make each member to look like an 'extreme' character and when he was creating them, Kishimoto followed the 5 steps, like drafting, sketching, colouring, inking and shading. Moreover, when he started creating the series, Kishimoto paid attention to the designs of the village and the settings. For instance, the village was created spontaneously, but he took the idea for the scenery from his home in Okayama, in Japan.
+
+Naruto Anime & Films
+
+
+Naruto manga transform to Anime - Naruto Shippuden AMV
+
+The Naruto Anime made its debut in Japan TV Tokyo in October 2002 and was concluded in 2007 after 220 episodes. In addition, these series led also led to the production of 10 films. The first one under the title 'Ninja clash in the land of Snow' was first released in August 2004 in Japan and told the story fo how Team 7 was sent to the Land of Snow, in order to protect the actors from shootings of he new Princess Fun movie.
+
+Music & Video Games
+
+The soundtracks of 'Naruto Manga' were composed by T. Masuda. The first under the title 'Naruto Manga Original Soundtrack' was released in April 2003 and had 22 tracks. In addition, the video games of Naruto, which are mostly fighting games, were seen in various consoles from Sony, Microsoft and Nintendo
+
+Other attractive Manga :
++ Seraph of the End 
++ Hunter x Hunter Manga",1,0,1,1,1,1,1,1,1,1,True,72,1,0,1,1,0,0,1,0,1,1,1,6,0
+1, one piece,1,6,209800000,29927,4.56,1086.0,"Description :
+Where To Read One Piece Manga Online
+
+If you’re a fan of anime and manga, then you definitely know One Piece. It’s a Japanese manga series by Eiichiro Oda, a world-renowned manga writer and illustrator. It was released nearly two decades ago back in July of 1997. Since then, the manga has been adapted into an anime series and OVA. There have also been numerous One Piece animated feature films and television specials. One Piece merchandise is also some of the best-selling items in all of anime. 
+
+Main characters in One Piece manga
+
+One Piece follows the adventurous and funny story of Monkey D. Luffy. As a boy, Luffy has always wanted to be the Pirate King. His body obtained the properties of rubber after eating a Devil Fruit. Together with a diverse crew of wannabe pirates, Luffy sets out on the ocean in an attempt to find the world’s ultimate treasure, One Piece.
+
+When talking about the most successful manga and anime series of all time, One Piece will always enter the conversation. Just the mere fact of it running for almost decades goes to show how loved it is by millions of fans worldwide. What’s interesting is that there are still plenty of folks who are eager to get started on their One Piece adventure. It doesn’t matter if they have to read countless manga chapters or watch hundreds of anime episodes. The undeniable lure of One Piece continues to fascinate fans around the world.
+
+The series boasts of some jaw-dropping numbers. The manga consists of over 800 chapters while the anime series has more than 700 episodes. And there are no signs of slowing down. One Piece has even made it to the Guinness Book of World Records. The manga has 320 million copies in print worldwide as of June 2015.
+
+It’s never too late to join Luffy and his crew of amazing pirates. You can choose to jump straight to the anime series, but many hardcore fans recommend that starters begin with the manga. There are plenty of places where you can read One Piece manga online. Usually, it all boils down to personal preference. You can check out community forums and see a list of the most suggested manga websites. The official version from Viz Media is a good place to start.
+
+
+
+One Piece Manga transform to Anime - Marine Ford Saga
+
+
+One huge determining factor of what manga website to use is how fast it is in releasing new chapters. Most websites are able to upload a new chapter after a day or two from being released. But there are some out there which can release on the same day. Thousands of fans flock to these sites in order to get the first glimpse of the new chapter. After all, you want to be the first in action and avoid getting spoiled in community forums or on social media.
+
+It’s time to begin your own adventure and look for the best place to read One Piece manga online. It shouldn’t be too difficult to find several manga websites. Just be sure to try multiple sites to see their differences so you can come up with an informed decision.
+
+If you are a fan of One Piece, you know that new chapters of this pirate tale are coming out soon. Not every manga website can offer these chapters license-free. That means you may hit a snag when you go to read the newest chapter.
+
+Even if you use the same One Piece manga fan website as before to read chapters you can sometimes discover that you are unable to view the whole story. Make sure to check the website's terms and agreements.
+
+It is probably more boring to read terms and conditions than One Piece manga, but your time will be well spent. You might find that the website can no longer display licensed content for free. In this instance you may need to apply for a paid account.
+
+It helps to pay for an account so that you get to read the content you crave while the creator's rights are protected. Besides this, if you sign up for an account, you usually get a choice to read online or on a smart phone or tablet using the app that the website offers.
+
+Always find legitimate websites to read your favorite manga. You will get access to everything with no disappointments. In addition, you have options to read the chapters from a computer or from an app that you download. This lets you have the convenience of reading the story while on a train, in a car, on a plane or wherever you are when the mood to manga hits.
+
+If you want to try a chapter before you sign up for an account at a website that licenses the work, you could take a peek over at a site that is run by a fan. Fans like you are often happy to post chapters which they have translated.
+
+Other attractive Manga : 
++ Detective Conan Manga
++ Girls of the Wilds Manga",0,1,1,1,1,0,1,1,0,1,True,106,1,1,0,0,0,-1,1,1,0,1,1,10,1

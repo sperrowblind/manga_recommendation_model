@@ -50,6 +50,29 @@
         .material-icons.right {
             display: inline !important;
         }
+        .genre-buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-left: 20px;
+        }
+        .genre-buttons-container .row {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+        .new-manga-buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 30px;
+            margin-left: -30px;
+        }
+
+        .new-manga-buttons-container .col {
+            flex-basis: 30%;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -69,7 +92,7 @@
             <div class="col s12 m4">
                 <div class="card">
                     <div class="card-image">
-                        <img src="{{ url_for('static', filename='junji_ito.jpeg') }}" alt="A beautiful image">
+                        <img src="{{ url_for('static', filename='miura.jpeg') }}" alt="A beautiful image">
                         <span class="card-title">Predict</span>
                     </div>
                     <div class="card-content center-align" style="background-color: #5C527F;">
@@ -97,7 +120,7 @@
             <div class="col s12 m4">
                 <div class="card">
                     <div class="card-image">
-                        <img src="{{ url_for('static', filename='ONE.jpeg') }}" alt="A beautiful image">
+                        <img src="{{ url_for('static', filename='miura.jpeg') }}" alt="A beautiful image">
                         <span class="card-title">Search</span>
                     </div>
                     <div class="card-content center-align" style="background-color: #5C527F;">
@@ -158,38 +181,79 @@
     <!-- new manga modal -->
     <div id="new-manga-modal" class="modal" style="color: #fafafa;">
         <div class="modal-content">
-            <div class="right-align">
-                <a href="#!" class="modal-close"><i class="material-icons" style="color: #261C2C">close</i></a>
+          <div class="right-align">
+            <a href="#!" class="modal-close"><i class="material-icons" style="color: #261C2C">close</i></a>
+          </div>
+          <h4 class="center-align">Find New Manga</h4>
+          <div class="row center-align valign-wrapper new-manga-buttons-container" style="margin-top: 30px;">
+            <div class="col s12 m4">
+              <button id="new-manga-button-5" class="btn waves-effect waves-light new-manga-button" type="button" style="color: #fafafa; background-color: #261C2C;">Find Manga (5)
+                <i class="material-icons right">search</i>
+              </button>
             </div>
-            <h4 class="center-align">Find New Manga</h4>
-            <div class="row center-align valign-wrapper" style="height: 200%; margin-top: 80px;">
-                <div class="col s12 m4">
-                    <button id="new-manga-button-5" class="btn waves-effect waves-light" type="button" style="color: #fafafa; background-color: #261C2C;">Find Manga (5)
-                        <i class="material-icons right">search</i>
-                    </button>
-                </div>
-                <div class="col s12 m4">
-                    <button id="new-manga-button-10" class="btn waves-effect waves-light" type="button" style="color: #fafafa; background-color: #261C2C;">Find Manga (10)
-                        <i class="material-icons right">search</i>
-                    </button>
-                </div>
-                <div class="col s12 m4">
-                    <button id="new-manga-button" class="btn waves-effect waves-light" type="button" style="color: #fafafa; background-color: #261C2C;">Find Manga All
-                        <i class="material-icons right">search</i>
-                    </button>
-                </div>
+            <div class="col s12 m4">
+              <button id="new-manga-button-10" class="btn waves-effect waves-light new-manga-button" type="button" style="color: #fafafa; background-color: #261C2C;">Find Manga (10)
+                <i class="material-icons right">search</i>
+              </button>
             </div>
+            <div class="col s12 m4">
+              <button id="new-manga-button" class="btn waves-effect waves-light new-manga-button" type="button" style="color: #fafafa; background-color: #261C2C;">Find Manga All
+                <i class="material-icons right">search</i>
+              </button>
+            </div>
+          </div>
+          <div class="row center-align valign-wrapper" style="margin-top: 30px;">
+            <div class="col s12">
+              <div class="genre-buttons-container">
+                <div class="row">
+                  <div class="col s4">
+                    <button id="genre-action-button" class="btn waves-effect waves-light genre-button" type="button" style="background-color: #3E2C41; width: 100%" value="action">Action</button>
+                  </div>
+                  <div class="col s4">
+                    <button id="genre-adventure-button" class="btn waves-effect waves-light genre-button" type="button" style="background-color: #3E2C41; width: 100%" value="adventure">Adventure</button>
+                  </div>
+                  <div class="col s4">
+                    <button id="genre-fantasy-button" class="btn waves-effect waves-light genre-button" type="button" style="background-color: #3E2C41; width: 100%" value="fantasy">Fantasy</button>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col s4">
+                    <button id="genre-shounen-button" class="btn waves-effect waves-light genre-button" type="button" style="background-color: #3E2C41; width: 100%" value="shounen">Shounen</button>
+                  </div>
+                  <div class="col s4">
+                    <button id="genre-seinen-button" class="btn waves-effect waves-light genre-button" type="button" style="background-color: #3E2C41; width: 100%" value="seinen">Seinen</button>
+                  </div>
+                  <div class="col s4">
+                    <button id="genre-horror-button" class="btn waves-effect waves-light genre-button" type="button" style="background-color: #3E2C41; width: 100%" value="horror">Horror</button>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col s4">
+                    <button id="genre-comedy-button" class="btn waves-effect waves-light genre-button" type="button" style="background-color: #3E2C41; width: 100%" value="comedy">Comedy</button>
+                  </div>
+                  <div class="col s4">
+                    <button id="genre-psychological-button" class="btn waves-effect waves-light genre-button" type="button" style="background-color: #3E2C41; width: 100%" value="psychological">Psychological</button>
+                  </div>
+                  <div class="col s4">
+                    <button id="genre-scifi-button" class="btn waves-effect waves-light genre-button" type="button" style="background-color: #3E2C41; width: 100%" value="sci-fi">Sci-Fi</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
         <div id="magnifying-glass-new" class="hide center-align">
-            <img src="{{ url_for('static', filename='magnifying_glass.gif') }}" alt="Magnifying_Glass" animated>
+          <img src="{{ url_for('static', filename='magnifying_glass.gif') }}" alt="Magnifying_Glass" animated>
         </div>
         <div id="new-manga-results" style="padding: 20px;"></div>
         <div class="modal-footer" style="background-color: #6E85B2; padding-top: 20px;">
-            <h6 class="center-align" style="position: relative; bottom: 12px;">
-                The more manga are predicted, the longer the scraper will be working
-            </h6>
+          <h6 class="center-align" style="position: relative; bottom: 12px;">
+            The more manga are predicted, the longer the scraper will run
+          </h6>
         </div>
-    </div>
+      </div>
+
 
 
     <!-- search modal -->
@@ -229,51 +293,54 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         document.getElementById('new-manga-button-5').addEventListener('click', function() {
-            document.getElementById('magnifying-glass-new').classList.remove('hide');
-
-            const controller = new AbortController();
-            const signal = controller.signal;
-
-            fetch('/new_manga?limit=5', {signal})
-                .then(function(response) {
-                    return response.text();
-                })
-                .then(function(data) {
-                    document.getElementById('new-manga-results').innerHTML = data;
-                    document.getElementById('magnifying-glass-new').classList.add('hide');
-                })
-                .catch(function(error) {
-                    console.error(error);
-                });
-
-            // Abort the fetch if the modal is closed
-            $('.modal-close').click(function() {
-                controller.abort();
-            });
+            const selectedGenres = getSelectedGenres();
+            executeNewMangaFetch(5, selectedGenres);
         });
 
         document.getElementById('new-manga-button-10').addEventListener('click', function() {
-            document.getElementById('magnifying-glass-new').classList.remove('hide');
+            const selectedGenres = getSelectedGenres();
+            executeNewMangaFetch(10, selectedGenres);
+        });
 
-            const controller = new AbortController();
-            const signal = controller.signal;
+        document.getElementById('new-manga-button').addEventListener('click', function() {
+            const selectedGenres = getSelectedGenres();
+            executeNewMangaFetch(null, selectedGenres);
+        });
 
-            fetch('/new_manga?limit=10', {signal})
-                .then(function(response) {
-                    return response.text();
-                })
-                .then(function(data) {
-                    document.getElementById('new-manga-results').innerHTML = data;
-                    document.getElementById('magnifying-glass-new').classList.add('hide');
-                })
-                .catch(function(error) {
-                    console.error(error);
-                });
+        document.getElementById('genre-action-button').addEventListener('click', function() {
+            toggleGenreButton('genre-action-button');
+        });
 
-            // Abort the fetch if the modal is closed
-            $('.modal-close').click(function() {
-                controller.abort();
-            });
+        document.getElementById('genre-fantasy-button').addEventListener('click', function() {
+            toggleGenreButton('genre-fantasy-button');
+        });
+
+        document.getElementById('genre-adventure-button').addEventListener('click', function() {
+            toggleGenreButton('genre-adventure-button');
+        });
+
+        document.getElementById('genre-shounen-button').addEventListener('click', function() {
+            toggleGenreButton('genre-shounen-button');
+        });
+
+        document.getElementById('genre-seinen-button').addEventListener('click', function() {
+            toggleGenreButton('genre-seinen-button');
+        });
+
+        document.getElementById('genre-horror-button').addEventListener('click', function() {
+            toggleGenreButton('genre-horror-button');
+        });
+
+        document.getElementById('genre-comedy-button').addEventListener('click', function() {
+            toggleGenreButton('genre-comedy-button');
+        });
+
+        document.getElementById('genre-scifi-button').addEventListener('click', function() {
+            toggleGenreButton('genre-scifi-button');
+        });
+
+        document.getElementById('genre-psychological-button').addEventListener('click', function() {
+            toggleGenreButton('genre-psychological-button');
         });
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -292,35 +359,78 @@
                     $('#found_search').empty();
                     $('#new_manga').empty();
                 });
-            })
-
-            $('#new-manga-button').click(function() {
-                $('#new-manga-results').empty();
-                document.getElementById("magnifying-glass-new").classList.remove("hide");
-
-                const controller = new AbortController();
-                const signal = controller.signal;
-
-                fetch('/new_manga', {signal})
-                    .then(function(response) {
-                        return response.text();
-                    })
-                    .then(function(data) {
-                        document.getElementById("magnifying-glass-new").classList.add("hide");
-                        $('magnifying-glass-new').addClass('hide');
-                        $('#new-manga-results').html(data);
-                    })
-                    .catch(function(error) {
-                        console.error(error);
-                    });
-
-                // Abort the fetch if the modal is closed
-                $('.modal-close').click(function() {
-                    controller.abort();
-                });
             });
         });
 
+        function executeNewMangaFetch(limit, genres) {
+            document.getElementById('magnifying-glass-new').classList.remove('hide');
+            document.getElementById('new-manga-results').innerHTML = '';
+
+            const controller = new AbortController();
+            const signal = controller.signal;
+
+            let url = '/new_manga';
+            const queryParams = [];
+
+            if (limit) {
+                queryParams.push('limit=' + limit);
+            }
+            if (genres && genres.length > 0) {
+                genres.forEach(genre => queryParams.push('genre=' + genre));
+            }
+
+            if (queryParams.length > 0) {
+                url += '?' + queryParams.join('&');
+            }
+
+            fetch(url, { signal })
+                .then(function(response) {
+                    return response.text();
+                })
+                .then(function(data) {
+                    document.getElementById('new-manga-results').innerHTML = data;
+                    document.getElementById('magnifying-glass-new').classList.add('hide');
+                })
+                .catch(function(error) {
+                    console.error(error);
+                });
+
+            // Abort the fetch if the modal is closed
+            $('.modal-close').click(function() {
+                controller.abort();
+            });
+        }
+
+        function toggleGenreButton(buttonId) {
+            const button = document.getElementById(buttonId);
+            button.classList.toggle('active');
+
+            const genre = button.value;
+            const selectedGenres = getSelectedGenres();
+
+            if (button.classList.contains('active')) {
+                if (!selectedGenres.includes(genre)) {
+                    selectedGenres.push(genre);
+                }
+                button.style.backgroundColor = '#6E85B2';
+                button.style.color = '#fafafa';
+            } else {
+                const index = selectedGenres.indexOf(genre);
+                if (index > -1) {
+                    selectedGenres.splice(index, 1);
+                }
+                button.style.backgroundColor = '#3E2C41';
+                button.style.color = '#fafafa';
+            }
+        }
+
+        function getSelectedGenres() {
+            const genreButtons = document.querySelectorAll('.genre-button.active');
+            const selectedGenres = Array.from(genreButtons).map(button => button.value);
+            return selectedGenres;
+        }
+
+        // don't touch after
         document.getElementById('upload-button').addEventListener('click', function() {
             document.getElementById('csv-file').click();
         });

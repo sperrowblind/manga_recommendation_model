@@ -50,6 +50,28 @@
             .material-icons.right {
                 display: inline !important;
             }
+            h6 {
+                margin-top: 10px;
+                margin-bottom: 15px;
+                text-align: justify;
+                margin-left: 20px;
+                margin-right: 20px;
+            }
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+            h5 {
+                margin-top: 30px;
+                margin-left: 20px;
+                margin-right: 20px;
+            }
+            .center-align {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 65vh; /* Adjust the height as needed */
+            }
         </style>
     </head>
     <body>
@@ -68,21 +90,21 @@
             Included are a few graphs and tables representing the different statistics and interesting observations that I've seen.
         </h6>
         <h6>
-            This section was last updated on April 22, 2023.
+            This section was last updated on July 9, 2023.
         </h6>
         <h6>
             DISCLAIMER: I have not yet added censoring to manga titles in the predicted_data table of the database.
             Because of this, I have no control over what titles are scraped from the Random Manga functionality of this application.
-            That modal works by taking the first 5, 10, or entire page of latest manga from Manganato at any time.
-            I have no control over what manga has recently released and may be inserted into the database.
+            That modal works by taking the first 5, 10, or the entire page of the latest manga from Manganato at any time.
+            I have no control over what manga have recently been released and may be inserted into the database.
             As well, though I will go into more detail below, the wikipedia scraper is not yet perfect and has a tendency to choose a completely unrelated page compared to the title searched for.
         </h6>
         <h6>
             This project was started after realizing that my ratings given on my manga spreadsheet followed a seemingly normal distribution.
         </h6>
-        <h1>
-            <img src="{{ url_for('static', filename='count_of_rating.jpeg') }}" alt="A beautiful image">
-        </h1>
+        <div class="center-align">
+            <img src="{{ url_for('static', filename='count_of_rating.jpeg') }}" alt="Original rating distribution">
+        </div>
         <h6>
             With this discovery, I wanted to see if I could create a model using my data from my spreadsheet and possibly predict what I would rate a manga that I haven't read yet.
             However, this already yields an issue with creating a model, in that I'm attempting to create a model that will predict my own bias on rating.
@@ -93,26 +115,76 @@
             Statistics concerning the model will be given below; however, the model appears to be able to give ratings from 4-7 the most often, but has had the ability to rate lower.
             Very rarely, I've seen the current model give a rating of an 8 or higher, which does seem to to be accurate to my own ratings, having only given 3 titles a 10.
         </h6>
+        <h5>The Dataset</h5>
         <h6>
-            I originally tried to perform manual model selection using logistic regression as my primary model. I attempted to use the H2o library to tune my model selection and achieved mixed results.
+            The dataset is composed of different manga titles that I have read, am currently reading, or have dropped.
+            As of today, there are a total of 200 titles in my dataset.
+            I keep certain columns in my data such as title, secondary_translation_title, finished/ongoing, rating, personal_description, date_read, would_read_again, and count_of_title_characters.
+            To clarify, titles that have been dropped (Reading stopped before finishing the most recently released chapter) are still in the data as they are a good representation of titles I do not like.
+            Any title that has been dropped does not have a rating higher than a 4.
+            I follow certain rules when rating titles, though there are lapses of judgment following the rating system based on my own bias.
+            I rate on whether or not the title is an original concept, has good art, has good writing, and if I enjoyed it.
+            The more I enjoy a title, the higher it will be rated; however, the other points can increase the rating whether I enjoyed it or not.
+            The primary concept is still how much I enjoyed the manga, but if a title hits perfectly on all points then it will receive a 10.
+            Only 3 titles have been rated as a 10.
+            Titles that are rated as a 7 or higher are considered ones that I legitimately enjoy and would recommend, anything below may still have a level of being “good,” but is not considered one of my favorites in any way.
+            I allow myself to reread manga and update the spreadsheet only once for each title.
+            An example of this is Ajin which I originally gave a 7 but upgraded to an 8 after another read.
+            Despite the number of columns, the only ones currently use in the project are title, rating, and count_of_title_characters.
+            I need to remove count_of_title_characters for the model training, especially since I already add that column for new data through python.
+            I want to add the second_translation_title to the pipeline in the future, as this could help the wikipedia scraper get more accurate results.
         </h6>
-        <h1>
+        <h5>The Pipeline</h5>
+        <h6>
+            The pipeline for creating the final dataset used in model selection is performed through the scraping of the websites, manganato and wikipedia.
+            Manganato is a decent site to read manga and is primarily where I read titles, though I have used others in the past and want to add scraping to other websites in the future.
+            Through manganato, I’m able to scrape data such as number of views, average rating, description, author, genres, ongoing status, number of chapters, among some others.
+            However, manganato is not a good site for trying to figure out information such as when the manga was released or if it has any awards, as manga appears to be taken down regularly and re-added.
+            Still, it hosts the majority of all manga that are on my data sheet, with the exception of 7 which were read on other sites.
+            Due to the fact that manganato is the primary source of data for the project, if titles are not found on the website, they are removed from the final data sheet.
+            Added in recently, the description from manganato is used with the nltk library to get word counts of non-stopwords.
+            Following the completion of manganato scraping, the pipeline then scrapes wikipedia for titles to get more information.
+            This wikipedia portion of the pipeline has been the bane of my existence for a while, though it has gotten better over time.
+            Originally, the wikipedia scraper would get a completely unrelated url while trying to use the search functionality of the wikipedia library, causing the wikipedia data to be unusable.
+            Recently, the wikipedia scraper has been updated to use the MediaWiki API, which has had the results be more efficient.
+            There are still a few issues with it due to not every manga title having a legitimate wiki page.
+            I am considering switching the wikipedia scraper to use another website, but have not done so at this moment.
+            The scrapper is now much more efficient at determining if a title has a valid page, but this has resulted in ~50% of titles actually having a valid page.
+        </h6>
+        <h6>
+            Following scraping, the different categorical variables are transformed into usable dummies.
+            If more info on variables is interesting, I recommend checking the csv folder for the different files to see how the process works throughout the pipeline.
+        </h6>
+        <h6>
+            Also added recently, the pipeline was made to be asynchronous, meaning the different requests made to manganato and wikipedia are done concurrently, greatly speeding up the entire process.
+            I’ve timed that finding the whole page of the newest manga from manganato in the application has dropped to ~18 seconds compared to ~5 minutes prior to the changes.
+        </h6>
+        <h5>The Model</h5>
+        <h6>
+            I originally tried to perform manual model selection using logistic regression as my primary model.
+            I attempted to use the H2o library to tune my model selection and achieved mixed results.
+        </h6>
+        <div class="center-align">
             <img src="{{ url_for('static', filename='h2o_predicted_vs_actual.jpeg') }}" alt="Image of predicted vs actual rating for titles by h2o model">
-        </h1>
-        <img src="data:image/png;base64,{{ graph_image_data }}" alt="Graph">
+        </div>
+        <h6></h6>
         <h6>
             The model chosen through this manual method appeared to be somewhat accurate, but was usually off by two ratings either above or below.
-            Personally, for a model meant to predict my own biased rating, I was not unhappy with this. After further research on the H2o library, seeing that it's primary use was for models with large datasets, I decided against the use of the library and went a different route.
-        </h6>
-        <h6>
-            I decided to work towards automatic model selection but knew that I needed to automate feature selection as well.
-            Currently, the automatic model selection found in manga_model.py works in the beginning by finding features for use in the model using the featurewiz library,
-             creating a heatmap and removing highly correlated variables, using lasso, manual feature selection (to be removed since more variables have been added),
-              and removing none and using the original dataset with all features.
+            Personally, for a model meant to predict my own biased rating, I was not unhappy with this.
+            After further research on the H2o library, seeing that its primary use was for models with large datasets, I decided against the use of the library and went a different route.
+            I decided to work towards dynamic model selection but knew that I needed to automate feature selection as well.
+            Currently, the automatic model selection found in manga_model.py works in the beginning by finding features for use in the model using the featurewiz library, creating a heatmap and removing highly correlated variables, using lasso, and removing none and using the original dataset with all features.
             Then, model selection is performed using grid search for cross validation and comparing decision trees, random forest, neural networks, logistic regression, gradient boosting, and knn means models.
             The best model of each feature selection is chosen on accuracy rate, and the final model is chosen comparing highest r squared.
         </h6>
-
+        <h6>Below is a graph showing the total count of ratings predicted by the models</h6>
+        <div class="center-align">
+            <img src="data:image/png;base64,{{ graph_image_data }}" alt="Graph">
+        </div>
+        <h6>Below is a table showing different metrics for the current model</h6>
+        <div class="center-align">
+            {{model_metrics|safe}}
+        </div>
 
         <!-- scripts -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

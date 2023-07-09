@@ -3,10 +3,10 @@ import pandas as pd
 
 from .manga_pipeline.manga_scraper import connect_db, scrape_manga
 from .manga_pipeline.manga_data_transform import transform_data, columns_for_model, get_word_count_df
-from .backend_utils.predict_route_utils import load_model
+from .backend_utils.predict_route_utils import load_model, find_predictions
 from .backend_utils.search_route_utils import search_find_matches
 from .backend_utils.new_manga_route_utils import find_latest_manga_recommendations
-from .backend_utils.info_route_utils import get_predicted_titles_per_rating_graph
+from .backend_utils.info_route_utils import get_predicted_titles_per_rating_graph, get_metrics_table
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -17,18 +17,18 @@ def home():
 
 
 @app.route('/predict', methods=['POST'])
-def predict():
+async def predict():
     try:
         if 'file' in request.files:
             file = request.files['file']
             if file.filename != '':
                 df = pd.read_csv(file)
-                title = df.iloc[:, 0].tolist()
+                titles = df.iloc[:, 0].tolist()
         else:
-            title = request.form['manga-title']
-            title = title.split(',')
+            titles = request.form['manga-title']
+            titles = titles.split(',')
 
-        df = scrape_manga(title)
+        df = await scrape_manga(titles)
         df = transform_data(df)
         df = get_word_count_df(df)
 
@@ -39,38 +39,24 @@ def predict():
         if df.shape[0] == 0:
             return render_template('error.html', error='No titles were found with the given input')
 
-        titles = pd.DataFrame(df['Title'])
-        titles = titles.applymap(lambda x: x.title())
+        prediction_table = find_predictions(df, model)
 
-        df.drop(['Title'], axis=1, inplace=True)
-
-        prediction = model.predict(df)
-        df_predictions = pd.DataFrame(prediction, columns = ['Predicted Rating'])
-        prediction = titles.join(df_predictions)
-        prediction['Predicted Rating'] = prediction['Predicted Rating'].fillna(1.0).astype(int)
-        with connect_db() as con:
-            cur = con.cursor()
-            cur.execute("CREATE TABLE IF NOT EXISTS predicted_data (Title TEXT PRIMARY KEY, Predicted_Rating INT)")
-            for _, row in prediction.iterrows():
-                title = row['Title']
-                predicted_rating = row['Predicted Rating']
-                cur.execute("SELECT * FROM predicted_data WHERE Title=?", (title,))
-                existing_row = cur.fetchone()
-                if existing_row is None:
-                    cur.execute("INSERT INTO predicted_data (Title, Predicted_Rating) VALUES (?, ?)", (title, predicted_rating))
-                elif existing_row[1] != predicted_rating:
-                    cur.execute("UPDATE predicted_data SET Predicted_Rating=? WHERE Title=?", (predicted_rating, title))
-            con.commit()
-        return render_template('prediction.html', prediction=prediction.to_html(index=False, classes='table table-striped'))
+        return render_template('prediction.html', prediction=prediction_table)
     except Exception as e:
         return render_template('error.html', error=e)
 
 @app.route('/new_manga', methods=['GET'])
-def new_manga():
+async def new_manga():
     limit = int(request.args.get('limit', 40))
-    titles = find_latest_manga_recommendations(limit)
+
+    genres = request.args.getlist('genre')
+
+    titles = find_latest_manga_recommendations(limit, genres)
+
+    if len(titles) == 0:
+        return render_template('error.html', error="No titles were found")
     try:
-        df = scrape_manga(titles)
+        df = await scrape_manga(titles)
         print('BEGINNING TO TRANSFORM DATA')
         df = transform_data(df)
         df = get_word_count_df(df)
@@ -78,33 +64,25 @@ def new_manga():
         # Load the pkl model
         model = load_model()
 
+       # df_columns = set(df.columns)
+
         df = columns_for_model(df)
+
         if df.shape[0] == 0:
             return render_template('error.html')
 
-        titles = pd.DataFrame(df['Title'])
-        titles = titles.applymap(lambda x: x.title())
+        #model_columns = set(df.columns)
 
-        df.drop(['Title'], axis=1, inplace=True)
+        # Compare the column names
+        #missing_columns = model_columns - df_columns
+        #extra_columns = df_columns - model_columns
 
-        prediction = model.predict(df)
-        df_predictions = pd.DataFrame(prediction, columns = ['Predicted Rating'])
-        prediction = titles.join(df_predictions)
-        prediction['Predicted Rating'] = prediction['Predicted Rating'].fillna(1.0).astype(int)
-        with connect_db() as con:
-            cur = con.cursor()
-            cur.execute("CREATE TABLE IF NOT EXISTS predicted_data (Title TEXT PRIMARY KEY, Predicted_Rating INT)")
-            for _, row in prediction.iterrows():
-                title = row['Title']
-                predicted_rating = row['Predicted Rating']
-                cur.execute("SELECT * FROM predicted_data WHERE Title=?", (title,))
-                existing_row = cur.fetchone()
-                if existing_row is None:
-                    cur.execute("INSERT INTO predicted_data (Title, Predicted_Rating) VALUES (?, ?)", (title, predicted_rating))
-                elif existing_row[1] != predicted_rating:
-                    cur.execute("UPDATE predicted_data SET Predicted_Rating=? WHERE Title=?", (predicted_rating, title))
-            con.commit()
-        return render_template('new_manga.html', new_manga_results=prediction.to_html(index=False, classes='table table-striped'))
+        #print("Missing columns in df:", missing_columns)
+        #print("Extra columns in df:", extra_columns)
+
+        prediction_table = find_predictions(df, model)
+
+        return render_template('new_manga.html', new_manga_results=prediction_table)
     except Exception as e:
         return render_template('error.html', error=e)
 
@@ -112,21 +90,21 @@ def new_manga():
 @app.route('/search', methods=['POST'])
 def search():
     manga_title = request.form['search']
-    query = "SELECT DISTINCT Title, Rating, 'Train Dataset' as Source FROM model_data \
+    query = "SELECT DISTINCT Title, Rating, 'Train Dataset' as Source, 'N/A' as Model_Version FROM model_data \
              UNION \
-             SELECT DISTINCT Title, Predicted_Rating as Rating, 'Predicted Dataset' as Source FROM predicted_data"
+             SELECT DISTINCT Title, Predicted_Rating as Rating, 'Predicted Dataset' as Source, Model_Version FROM predicted_data"
     try:
         with connect_db() as con:
             cursor = con.cursor()
             cursor.execute(query)
             result = cursor.fetchall()
-            df = pd.DataFrame(result, columns=['Title', 'Rating', 'Source'])
+            df = pd.DataFrame(result, columns=['Title', 'Rating', 'Source', 'Model_Version'])
             df['Rating'] = df['Rating'].fillna(1.0).astype(int)
             matches = search_find_matches(result, manga_title)
             if matches:
-                matches = sorted(matches, key=lambda x: x[3], reverse=True)
-                matches = [(title, rating, source) for title, rating, source, _ in matches]
-                df_filtered = df[df['Title'].isin([title for title, _, _ in matches])]
+                matches = sorted(matches, key=lambda x: x[4], reverse=True)
+                matches = [(title, rating, source, model_version, _) for title, rating, source, model_version, _ in matches]
+                df_filtered = df[df['Title'].isin([title for title, _, _ , _, _,in matches])]
                 search_html = render_template('found_search.html', search=df_filtered.to_html(index=False, classes='table table-striped'))
                 return search_html
             else:
@@ -138,4 +116,5 @@ def search():
 @app.route('/info', methods=['GET'])
 def info():
     predicted_vs_rating = get_predicted_titles_per_rating_graph()
-    return render_template('model_info.html', graph_image_data=predicted_vs_rating)
+    metrics = get_metrics_table()
+    return render_template('model_info.html', graph_image_data=predicted_vs_rating, model_metrics=metrics)

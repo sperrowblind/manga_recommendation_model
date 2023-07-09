@@ -7,7 +7,7 @@ import os
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV as GSV
-from sklearn.metrics import accuracy_score, r2_score
+from sklearn.metrics import accuracy_score, r2_score, mean_squared_error, mean_absolute_error
 from sklearn.linear_model import LogisticRegression, Lasso
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
@@ -73,7 +73,8 @@ def heatmap_get_predictors(df: DataFrame) -> DataFrame:
 
 def lasso_get_predictors(df: DataFrame) -> DataFrame:
     y = df['Rating']
-    df_new = df.drop(['Rating', 'Title'], axis=1)
+    df_new = df.drop(['Title', 'Rating'], axis=1)
+
     X_train, X_test, y_train, y_test = train_test_split(df_new, y, test_size=0.2, random_state=2340)
 
     scaler = StandardScaler()
@@ -84,7 +85,7 @@ def lasso_get_predictors(df: DataFrame) -> DataFrame:
     lasso.fit(X_train, y_train)
     selected_features = lasso.coef_ != 0
     selected_feature_indices = [i for i, x in enumerate(selected_features) if x]
-    selected_feature_indices = df.columns[selected_feature_indices].tolist()
+    selected_feature_indices = df_new.columns[selected_feature_indices].tolist()
     selected_feature_indices.append('Rating')
     selected_feature_indices.append('Title')
     selected_df = df[selected_feature_indices]
@@ -452,72 +453,120 @@ def find_best_model(df: DataFrame, which_frame: str):
     best_model = model_dict[best_model_name]
     return best_model
 
+def calculate_metrics(y_test, y_pred):
+    metrics = {}
+    metrics['R2'] = r2_score(y_test, y_pred)
+    metrics['MSE'] = mean_squared_error(y_test, y_pred)
+    try:
+        metrics['RMSE'] = np.sqrt(metrics['Mean Squared Error (MSE)'])
+    except:
+        metrics['RMSE'] = None
+    metrics['MAE'] = mean_absolute_error(y_test, y_pred)
+    try:
+        metrics['ADJ_R2'] = 1 - (1 - metrics['R2 Score']) * (len(y_test) - 1) / (len(y_test) - len(best_model_df.columns) - 1)
+        metrics['AIC'] = len(y_test) * np.log(metrics['Mean Squared Error (MSE)']) + 2 * len(best_model_df.columns)
+        metrics['BIC'] = len(y_test) * np.log(metrics['Mean Squared Error (MSE)']) + len(best_model_df.columns) * np.log(len(y_test))
+    except:
+        metrics['ADJ_R2'] = None
+        metrics['AIC'] = None
+        metrics['BIC'] = None
+
+    return metrics
+
+def save_metrics_to_sqlite(metrics):
+    with connect_db() as con:
+        con.execute("DROP TABLE IF EXISTS model_metrics")
+        con.execute("CREATE TABLE model_metrics (metric TEXT, value REAL, insert_date DATE)")
+        for metric, value in metrics.items():
+            con.execute("INSERT INTO model_metrics (metric, value, insert_date) VALUES (?, ?, date())", (metric, value))
+
 if __name__ == '__main__':
 
     df = get_data()
 
     word_df = df[['Title', 'description', 'Rating']]
-    word_df = get_word_count_df(word_df)
+    word_df = get_word_count_df(word_df.copy())
 
-    df_with_nltk = get_word_count_df(df)
+    df_with_nltk = get_word_count_df(df.copy())
 
     df.drop(['description'], axis=1, inplace=True)
 
-    featurewiz_df = featurewiz_get_predictors(df)
-    heatmap_df = heatmap_get_predictors(df)
-    lasso_df = lasso_get_predictors(df)
+    featurewiz_df = featurewiz_get_predictors(df.copy())
+    heatmap_df = heatmap_get_predictors(df.copy())
+    lasso_df = lasso_get_predictors(df.copy())
 
-    word_featurewiz_df = featurewiz_get_predictors(word_df)
-    word_heatmap_df = heatmap_get_predictors(word_df)
-    word_lasso_df = lasso_get_predictors(word_df)
+    word_featurewiz_df = featurewiz_get_predictors(word_df.copy())
+    word_heatmap_df = heatmap_get_predictors(word_df.copy())
+    word_lasso_df = lasso_get_predictors(word_df.copy())
 
-    df_nltk_featurewiz = featurewiz_get_predictors(df_with_nltk)
-    df_nltk_heatmap = heatmap_get_predictors(df_with_nltk)
+    df_nltk_featurewiz = featurewiz_get_predictors(df_with_nltk.copy())
+    df_nltk_heatmap = heatmap_get_predictors(df_with_nltk.copy())
+    df_nltk_lasso = lasso_get_predictors(df_with_nltk.copy())
+
+    lasso_model = find_best_model(lasso_df, 'lasso')
+    word_lasso_model = find_best_model(word_lasso_df, 'word_lasso')
+    nltk_lasso_model = find_best_model(df_nltk_lasso, 'nltk_lasso')
+
 
     word_model = find_best_model(word_df, 'word_nltk')
     word_featurewiz_model = find_best_model(word_featurewiz_df, 'word_featurewiz')
     word_heatmap_model = find_best_model(word_heatmap_df, 'word_heatmap')
-    word_lasso_model = find_best_model(word_lasso_df, 'word_lasso')
     nltk_featurewiz_model = find_best_model(df_nltk_featurewiz, 'nltk_featurewiz')
     nltk_heatmap_model = find_best_model(df_nltk_heatmap, 'nltk_heatmap')
-    #nltk_lasso_model = find_best_model(df_nltk_lasso, 'nltk_lasso')
+
     featurewiz_model = find_best_model(featurewiz_df, 'feature')
     heatmap_model = find_best_model(heatmap_df, 'heatmap')
-    lasso_model = find_best_model(lasso_df, 'lasso')
+
     original_model = find_best_model(df, 'original')
 
     x = df_with_nltk
     y = df_with_nltk['Rating']
     x = x.drop(['Rating', 'Title'], axis=1)
 
-    models = [featurewiz_model, heatmap_model, lasso_model, original_model, word_model, word_featurewiz_model, word_heatmap_model, word_lasso_model, nltk_featurewiz_model, nltk_heatmap_model]
-    dfs =    [featurewiz_df,    heatmap_df,    lasso_df,    df,             word_df,    word_featurewiz_df,    word_heatmap_df,    word_lasso_df,    df_nltk_featurewiz,    df_nltk_heatmap]
+    models = [featurewiz_model, heatmap_model, lasso_model, original_model, word_model, word_featurewiz_model, word_heatmap_model, word_lasso_model, nltk_featurewiz_model, nltk_heatmap_model, nltk_lasso_model]
+    dfs =    [featurewiz_df,    heatmap_df,    lasso_df,    df,             word_df,    word_featurewiz_df,    word_heatmap_df,    word_lasso_df,    df_nltk_featurewiz,    df_nltk_heatmap,    df_nltk_lasso]
     for model in dfs:
         model.drop(['Rating', 'Title'], axis=1, inplace=True)
 
     best_model = None
     best_r2 = -float('inf')
     best_model_df = None
+    y_test = None
+    y_pred = None
+    best_y_pred = None
+    best_test_accuracy = None
 
     if not os.path.exists('csvs'):
         os.makedirs('csvs')
 
-    for model in range(0,len(models)):
-        x_train, x_test, y_train, y_test = train_test_split(x[dfs[model].columns], y, test_size=0.1, random_state=2340)
-        y_pred = models[model].predict(x_test)
 
-        df_predictions = pd.DataFrame(y_pred, columns = ['predicted_rating'])
-        df_predictions.to_csv(os.path.join('csvs', f'{str(models[model])}_predictions.csv'))
+    for model, df in zip(models, dfs):
+        x_train, x_test, y_train, y_test = train_test_split(x[df.columns], y, test_size=0.1, random_state=2340)
+        y_pred = model.predict(x_test)
+        try:
+            df_predictions = pd.DataFrame(y_pred, columns=['predicted_rating'])
+            df_predictions.to_csv(os.path.join('csvs', f'{str(model)}_predictions.csv'))
 
-        r2 = r2_score(y_test, y_pred)
-        print(r2)
+            r2 = r2_score(y_test, y_pred)
+        except:
+            y_pred_int = np.round(y_pred * 8)
+            y_pred = np.argmax(y_pred_int, axis=1) + 1
 
-        if r2 > best_r2:
-            print(f'better model at index {model} which is a {models[model]}, with an r2 of {r2}')
-            best_model = models[model]
-            best_model_df = dfs[model]
+            r2 = r2_score(y_test, y_pred)
+
+
+        test_accuracy = accuracy_score(y_test, y_pred)
+        if r2 > best_r2 or (r2 == best_r2 and test_accuracy > best_test_accuracy):
+            print(f'Better model: {str(model)}, R-squared: {r2}, Test Accuracy: {test_accuracy}')
+            best_model = model
+            best_model_df = df
             best_r2 = r2
+            best_y_pred = y_pred
+            best_test_accuracy = test_accuracy
+
+    metrics = calculate_metrics(y_test, best_y_pred)
+    save_metrics_to_sqlite(metrics)
 
     best_model_df.to_csv(os.path.join('csvs', 'model_df.csv'))
-    with open('final_model_2.pkl', 'wb') as f:
+    with open('final_model_6.pkl', 'wb') as f:
         pickle.dump(best_model, f)

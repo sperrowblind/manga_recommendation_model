@@ -8,7 +8,7 @@ import asyncio
 import aiohttp
 import ssl
 
-from manga_pipeline.manga_pipeline_utils.manganato_url_scrape import (
+from .manga_pipeline_utils.manganato_url_scrape import (
     clean_title,
     reformat_url_name,
     scrape_manganato_url,
@@ -16,11 +16,11 @@ from manga_pipeline.manga_pipeline_utils.manganato_url_scrape import (
     load_cache
 )
 
-from manga_pipeline.manga_pipeline_utils.manganato_info_scrape import get_manga_info
+from .manga_pipeline_utils.manganato_info_scrape import get_manga_info
 
-from manga_pipeline.manga_pipeline_utils.wiki_url_scrape import process_row
+from .manga_pipeline_utils.wiki_url_scrape import process_row
 
-from manga_pipeline.manga_pipeline_utils.wiki_info_scrape import (
+from .manga_pipeline_utils.wiki_info_scrape import (
     get_page_content,
     clean_genre_data,
     clean_manganato_data,
@@ -37,6 +37,8 @@ def connect_db():
 
 async def manganato_url_scrape(manga_list=None):
     """Scrape Manganato URLs for manga titles."""
+
+    # manga_list is only not None if this function is called from the application
     if manga_list is None:
         with connect_db() as con:
             df = pd.read_sql_query("SELECT * FROM model_data_raw", con)
@@ -47,6 +49,7 @@ async def manganato_url_scrape(manga_list=None):
     df_search['url_name'] = df_search['Title'].apply(clean_title)
     df_search['url_name'] = df_search['url_name'].apply(reformat_url_name)
 
+    # Cache titles for easy retrieval, then set up async tasks
     cache = load_cache()
     ssl_context = ssl.create_default_context()
     ssl_context.check_hostname = False
@@ -61,21 +64,27 @@ async def manganato_url_scrape(manga_list=None):
 
     df_search['manganato_url'] = results
 
+    # Record what titles do not exist on manganato
     manual_input_manganato = df_search[df_search['manganato_url'].isnull()]
     with connect_db() as con:
         manual_input_manganato.to_sql("manganato_manual_input_needed", con, if_exists="replace")
+        df_search.to_sql("manganato_data", con, if_exists="replace")
 
     df_search.to_csv(os.path.join('csvs', 'manganato_urls.csv'))
 
+    # Cach titles for easy retrieval
     save_cache(cache)
 
     return df_search
 
 async def manganato_info_search(df_search):
+    """Scrape manganato titles for information on each"""
+
     df_manganato = df_search
 
     manga_info_df = []
 
+    # Create async tasks for getting information from each title url
     ssl_context = ssl.create_default_context()
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
@@ -94,6 +103,7 @@ async def manganato_info_search(df_search):
             if response is not None:
                 manga_info_df.append(response)
 
+    # Create a new df from the 2d list
     manga_info_df = pd.DataFrame(manga_info_df, columns=['manganato_url', 'author', 'num_authors', 'genre',
                                                          'num_genres', 'status', 'views', 'votes', 'avg_rating',
                                                          'last_chapter', 'description'])
@@ -104,6 +114,7 @@ async def manganato_info_search(df_search):
         pass
     manganato_info.reset_index()
 
+    # Make each author their own column for use as dummy variables
     author_frame = manganato_info[["manganato_url", "author"]]
 
     author_frame = author_frame.explode('author')
@@ -114,6 +125,7 @@ async def manganato_info_search(df_search):
     author_frame = author_frame.groupby('manganato_url').agg(lambda x: x.max())
     manganato_info = pd.merge(manganato_info, author_frame, on='manganato_url', how='inner')
 
+    # Make each genre their own column for use as dummy variables
     df_author_and_genre = manganato_info[["genre", 'manganato_url']]
 
     df_author_and_genre = df_author_and_genre.explode('genre')
@@ -135,6 +147,7 @@ async def manganato_info_search(df_search):
 
 
 async def wiki_url_scrape(manganato_info):
+    """Search for wiki urls for each title"""
     try:
         manganato_info.drop(['Unnamed: 0'], axis=1, inplace=True)
     except:
@@ -143,6 +156,8 @@ async def wiki_url_scrape(manganato_info):
     df_wiki = manganato_info
     df_wiki['wiki_url'] = 'None'
 
+    # This search works by initially searching for a disambiguation url for each title
+    # If no url is found, the wikipedia API is used to search for the title and ensure the author's name is in the page content
     df_wiki['wiki_url'] = df_wiki.apply(lambda x: 'https://en.wikipedia.org/wiki/' + x['Title'].strip().split('(')[0].replace(' ', '_') + "_(disambiguation)", axis=1)
     tasks = []
     for _, row in df_wiki.iterrows():
@@ -151,11 +166,7 @@ async def wiki_url_scrape(manganato_info):
     wiki_urls = await asyncio.gather(*tasks)
 
     df_wiki['wiki_url'] = wiki_urls
-    df_wiki['first_find_is_valid'] = df_wiki['wiki_url'] != 'None'
-    df_wiki['second_find_is_valid'] = df_wiki['first_find_is_valid']
-    df_wiki['has_wikipedia_page'] = df_wiki['first_find_is_valid'] | df_wiki['second_find_is_valid']
-    columns_to_drop = ['first_find_is_valid', 'second_find_is_valid']
-    df_wiki.drop(columns_to_drop, axis=1, inplace=True)
+    df_wiki['has_wikipedia_page'] = df_wiki['wiki_url'] != 'None'
 
     manual_input_wiki = df_wiki[df_wiki['wiki_url'] == 'None']
     manual_input_wiki.to_csv(os.path.join('csvs', 'manual_input_wiki_urls.csv'))
@@ -167,13 +178,15 @@ async def wiki_url_scrape(manganato_info):
 
 
 async def wiki_info_search(df_wiki):
+    """Scrape wikipedia pages for data"""
+
     df_wikipedia = df_wiki.copy()
     manga_info_df = []
 
     ssl_context = ssl.create_default_context()
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
-
+    print('starting async')
     async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context)) as session:
         tasks = []
         no_index = []
@@ -196,7 +209,8 @@ async def wiki_info_search(df_wiki):
             except Exception as e:
                 print(f"Error retrieving data for title: {df_wikipedia.loc[index, 'Title']}: {str(e)}")
                 continue
-
+    print('finished async')
+    print('starting genre cleanup')
     manga_info_df = pd.DataFrame(manga_info_df, columns=['wiki_url', 'wiki_genres', 'wiki_original_publisher', 'wiki_english_publisher', 'wiki_magazine', 'wiki_demographic', 'wiki_original_run', 'wiki_volumes'])
     manga_info_df['wiki_genres'] = manga_info_df['wiki_genres'].apply(clean_genre_data)
     manga_info_df.to_csv(os.path.join('csvs', 'wiki_info.csv'))
@@ -212,14 +226,14 @@ async def wiki_info_search(df_wiki):
     df_wiki_genre.drop([''], axis=1, inplace=True, errors='ignore')
     wiki_urls = pd.merge(wiki_urls, df_wiki_genre, on='wiki_url', how='inner')
     wiki_urls = wiki_urls.drop(['wiki_genres'], axis=1)
-
+    print('finished genre cleanup')
     df = wiki_urls
     df.to_csv(os.path.join('csvs', "combined_non_transformed_data.csv"))
     df = clean_manganato_data(df)
 
     df['wiki_start_date'] = np.nan
     df['wiki_end_date'] = np.nan
-
+    print('starting cleaning wiki variables')
     for index, row in df.iterrows():
         try:
             df.loc[index, 'wiki_demographic'] = df.loc[index, 'wiki_demographic'].split(',')[0]
@@ -251,7 +265,9 @@ async def wiki_info_search(df_wiki):
             df.loc[index, 'wiki_volumes'] = int(df.loc[index, 'wiki_volumes'].split(' ')[0])
         except:
             df.loc[index, 'wiki_volumes'] = np.nan
+    print('finished cleaning wiki vairables')
 
+    print('starting wiki publisher/magazine')
     df['wiki_original_publisher'] = df['wiki_original_publisher'].apply(lambda publisher: clean_publisher_data(publisher, '_original_publisher'))
     df['wiki_english_publisher'] = df['wiki_english_publisher'].apply(lambda publisher: clean_publisher_data(publisher, '_english_publisher'))
     df['wiki_magazine'] = df['wiki_magazine'].apply(lambda publisher: clean_publisher_data(publisher, '_magazine'))
@@ -281,7 +297,7 @@ async def wiki_info_search(df_wiki):
     df = df.drop(['wiki_original_publisher', 'wiki_english_publisher', 'wiki_magazine', 'wiki_original_run', 'author'], axis=1)
     df = pd.merge(df, df_wiki_publisher, on='wiki_url', how='inner')
     df = pd.merge(df, df_wiki_publisher_1, on='wiki_url', how='inner')
-
+    print('finished wiki publisher/magazine')
     columns_to_remove = ['Unnamed: 0', 'Unnamed: 189', 'wiki_', 'wiki_,']
     df = df.drop(columns=[col for col in df.columns if col in columns_to_remove or col == '' or col is np.nan])
     df.drop_duplicates(subset=['Title'], inplace=True)
