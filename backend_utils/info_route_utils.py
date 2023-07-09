@@ -9,12 +9,10 @@ from ..manga_pipeline.manga_data_transform import connect_db
 
 
 def get_predicted_titles_per_rating_graph():
-    # Connect to the database
     with connect_db() as con:
         df = pd.read_sql_query("SELECT Predicted_Rating AS rating, count(*) AS count FROM predicted_data GROUP BY rating", con)
         print(df)
 
-        # Plot the bar chart
         plt.switch_backend('Agg')
         fig, ax = plt.subplots()
         ax.barh(df['rating'], df['count'], color=['#7D26CD'])
@@ -28,11 +26,17 @@ def get_predicted_titles_per_rating_graph():
         canvas.draw()
         graph_image = Image.frombytes('RGB', canvas.get_width_height(), canvas.tostring_rgb())
 
-        # Convert the PNG image to a base64-encoded string
         buffer = io.BytesIO()
         graph_image.save(buffer, format='PNG')
         graph_image_data = base64.b64encode(buffer.getvalue()).decode()
 
         return graph_image_data
 
-        # Close the database connection
+def get_metrics_table():
+    with connect_db() as conn:
+
+        query = "SELECT metric, value, insert_date FROM model_metrics"
+        df = pd.read_sql_query(query, conn)
+        html_table = df.to_html(index=False, justify='center')
+        return html_table
+
