@@ -39,7 +39,7 @@ async def scrape_manganato_url(session, title, cache):
     if title in cache:
         return cache[title]
 
-    url = f'https://manganato.com/search/story/{reformat_url_name(title)}'
+    url = f'https://natomanga.com/search/story/{reformat_url_name(title)}'
     async with session.get(url) as response:
         text = await response.text()
         soup = BeautifulSoup(text, 'html.parser')

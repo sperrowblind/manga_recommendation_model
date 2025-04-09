@@ -4,7 +4,7 @@ from .new_manga_route_constants import MANGANATO_GENRES, MANGANATO_GENRE_BASE_PR
 
 def find_latest_manga_recommendations(limit, genre_list):
     if len(genre_list) == 0:
-        manganato_url = 'https://manganato.com/'
+        manganato_url = 'https://natomanga.com/'
         text = re.get(manganato_url).content
         soup = BeautifulSoup(text, 'html.parser')
         titles = [title.text.strip() for title in soup.find_all(class_='item-title')]

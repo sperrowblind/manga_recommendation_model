@@ -1,4 +1,4 @@
-BASE_MANGANATO_URL = "https://manganato.com/advanced_search?s=all&"
+BASE_MANGANATO_URL = "https://natomanga.com/advanced_search?s=all&"
 MANGANATO_GENRE_BASE_PREFIX = "g_i="
 MANGANATO_END_URL = "_&page=1"
 

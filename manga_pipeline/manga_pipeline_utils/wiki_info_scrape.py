@@ -129,9 +129,14 @@ def clean_manganato_data(df):
             df.loc[index, 'votes'] = int(df.loc[index, 'votes'])
             df.loc[index, 'avg_rating'] = float(df.loc[index, 'avg_rating'])
         else:
-            df.loc[index, 'views'] = int(df.loc[index, 'views'])
-            df.loc[index, 'votes'] = int(df.loc[index, 'votes'])
-            df.loc[index, 'avg_rating'] = float(df.loc[index, 'avg_rating'])
+            if df.loc[index, 'views'] != None:
+                df.loc[index, 'views'] = int(df.loc[index, 'views'])
+                df.loc[index, 'votes'] = int(df.loc[index, 'votes'])
+                df.loc[index, 'avg_rating'] = float(df.loc[index, 'avg_rating'])
+            else:
+                df.loc[index, 'views'] = 0
+                df.loc[index, 'votes'] = 0
+                df.loc[index, 'avg_rating'] = 0
         ## fix last_chapter
         if isinstance(df.loc[index, 'last_chapter'], str):
 

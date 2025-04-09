@@ -516,7 +516,6 @@ if __name__ == '__main__':
 
     featurewiz_model = find_best_model(featurewiz_df, 'feature')
     heatmap_model = find_best_model(heatmap_df, 'heatmap')
-
     original_model = find_best_model(df, 'original')
 
     x = df_with_nltk
@@ -568,5 +567,5 @@ if __name__ == '__main__':
     save_metrics_to_sqlite(metrics)
 
     best_model_df.to_csv(os.path.join('csvs', 'model_df.csv'))
-    with open('final_model_6.pkl', 'wb') as f:
+    with open('final_model_8.pkl', 'wb') as f:
         pickle.dump(best_model, f)
